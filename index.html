@@ -1,0 +1,265 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+<title>FitRutina</title>
+<link rel="apple-touch-icon" href="icon.png">
+<link rel="icon" href="icon.png">
+<meta name="apple-mobile-web-app-capable" content="yes">
+<meta name="mobile-web-app-capable" content="yes">
+<meta name="apple-mobile-web-app-title" content="FitRutina">
+<meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
+<meta name="theme-color" content="#17181A">
+<style>
+:root{--bg:#ECEDE8;--card:#fff;--ink:#17181A;--mute:#6A6E73;--acc:#2B59FF;--accink:#fff;--ok:#1F9D55;--line:#D6D8D2;--warn:#C2410C;
+box-sizing:border-box;padding-top:env(safe-area-inset-top,0px);padding-bottom:env(safe-area-inset-bottom,0px);color-scheme:light}
+@media (prefers-color-scheme:dark){:root:not([data-theme="light"]){--bg:#121315;--card:#1C1E21;--ink:#F1F2EE;--mute:#9A9EA3;--acc:#6C8BFF;--accink:#0B0C0E;--ok:#46C37B;--line:#2E3135;--warn:#F59E5B;color-scheme:dark}}
+:root[data-theme="dark"]{--bg:#121315;--card:#1C1E21;--ink:#F1F2EE;--mute:#9A9EA3;--acc:#6C8BFF;--accink:#0B0C0E;--ok:#46C37B;--line:#2E3135;--warn:#F59E5B;color-scheme:dark}
+html{scroll-padding-top:env(safe-area-inset-top,0px)}
+*{box-sizing:border-box}
+body{margin:0;background:var(--bg);color:var(--ink);font:500 16px/1.4 Barlow,system-ui,sans-serif;padding-bottom:78px}
+h1,h2,h3{font-family:"Barlow Condensed","Arial Narrow",system-ui,sans-serif;margin:0;letter-spacing:.2px}
+h1{font-size:34px}h2{font-size:26px}h3{font-size:21px}
+main{max-width:520px;margin:0 auto;padding:16px}
+.card{background:var(--card);border:1px solid var(--line);border-radius:14px;padding:14px;margin:12px 0}
+.mute{color:var(--mute);font-size:14px}
+label{display:block;font-size:14px;color:var(--mute);margin:12px 0 4px}
+input,select{width:100%;padding:11px;border:1px solid var(--line);border-radius:10px;background:var(--bg);color:var(--ink);font:inherit}
+.btn{display:block;width:100%;padding:14px;border:0;border-radius:12px;background:var(--acc);color:var(--accink);font:600 17px Barlow,sans-serif;margin-top:12px}
+.btn.alt{background:transparent;color:var(--ink);border:1px solid var(--line)}
+.chips{display:flex;flex-wrap:wrap;gap:8px}
+.chip{padding:8px 12px;border:1px solid var(--line);border-radius:99px;background:var(--card);font-size:14px;color:var(--ink)}
+.chip.on{background:var(--acc);color:var(--accink);border-color:var(--acc)}
+nav{position:fixed;left:0;right:0;bottom:0;display:flex;background:var(--card);border-top:1px solid var(--line);padding-bottom:env(safe-area-inset-bottom,0px)}
+nav button{flex:1;padding:12px 0;border:0;background:none;color:var(--mute);font:600 13px Barlow,sans-serif}
+nav button.on{color:var(--acc)}
+.ex{border-left:5px solid var(--line)}
+.ex.cur{border-left-color:var(--acc)}
+.ex.done{border-left-color:var(--ok);opacity:.55}
+.big{font-family:"Barlow Condensed","Arial Narrow",sans-serif;font-size:42px;font-weight:700;line-height:1}
+.bar{height:10px;background:var(--line);border-radius:9px;overflow:hidden}
+.bar i{display:block;height:100%;background:var(--acc)}
+.bar.over i{background:var(--warn)}
+.modal{position:fixed;inset:0;background:rgba(0,0,0,.55);display:flex;align-items:flex-end;justify-content:center;z-index:20}
+.modal>div{background:var(--card);width:100%;max-width:520px;border-radius:18px 18px 0 0;padding:18px 18px calc(18px + env(safe-area-inset-bottom,0px))}
+a{color:var(--acc)}
+.row{display:flex;gap:10px}.row>*{flex:1}
+</style>
+</head>
+<body>
+<main id="app"></main>
+<nav id="nav"></nav>
+<div id="modal"></div>
+<script>
+var DAYS=["Dom","Lun","Mar","Mié","Jue","Vie","Sáb"];
+var EQH={bar:"Barra de dominadas",db:"Mancuernas",band:"Bandas elásticas",bench:"Banco o silla firme"};
+var EQG={pecho:"Máquina de pecho",jalon:"Jalón al pecho",remo:"Remo en máquina",prensa:"Prensa de piernas",ext:"Extensión de piernas",curl:"Curl femoral",hombro:"Press de hombro",polea:"Poleas",mancg:"Mancuernas y banco",barra:"Barra libre (peso muerto)",cardio:"Cardio"};
+var SLOTS=[["Desayuno",8],["Snack mañana",11],["Almuerzo",13],["Snack tarde",16],["Cena",20]];
+// g: grupo, p: h casa / g gym, e: equipo requerido (none = ninguno)
+var EX=[
+{n:"Flexiones",g:"push",p:"h",e:"none",t:"Cuerpo en línea recta, baja el pecho hasta casi tocar el suelo y empuja sin arquear la espalda."},
+{n:"Fondos en banco",g:"push",p:"h",e:"bench",t:"Manos en el borde, codos hacia atrás, baja hasta 90° y sube sin encoger los hombros."},
+{n:"Press con mancuernas en suelo",g:"push",p:"h",e:"db",t:"Codos a 45° del cuerpo, empuja hacia arriba y controla la bajada."},
+{n:"Pike push-up",g:"push",p:"h",e:"none",t:"Cadera arriba en V invertida, baja la cabeza entre las manos y empuja."},
+{n:"Dominadas",g:"pull",p:"h",e:"bar",t:"Agarre un poco más ancho que los hombros, sube hasta pasar la barbilla sin balancearte."},
+{n:"Remo con mancuerna",g:"pull",p:"h",e:"db",t:"Espalda recta, lleva el codo hacia la cadera y aprieta la espalda arriba."},
+{n:"Remo con banda",g:"pull",p:"h",e:"band",t:"Tira hacia el abdomen juntando los omóplatos, sin encorvarte."},
+{n:"Superman",g:"pull",p:"h",e:"none",t:"Boca abajo, levanta brazos y piernas a la vez, mantén 2 segundos y baja lento."},
+{n:"Sentadillas",g:"legs",p:"h",e:"none",t:"Pies al ancho de hombros, cadera atrás, rodillas siguen la línea de los pies, talones pegados."},
+{n:"Zancadas",g:"legs",p:"h",e:"none",t:"Paso largo, rodilla de atrás casi al suelo y el torso erguido."},
+{n:"Puente de glúteo",g:"legs",p:"h",e:"none",t:"Sube la cadera apretando glúteos arriba; no arquees la zona lumbar."},
+{n:"Sentadilla goblet",g:"legs",p:"h",e:"db",t:"Mancuerna pegada al pecho, baja con la espalda recta y sube empujando el suelo."},
+{n:"Plancha",g:"core",p:"h",e:"none",t:"Codos bajo los hombros, glúteos y abdomen apretados, cuerpo en línea. No dejes caer la cadera."},
+{n:"Crunch abdominal",g:"core",p:"h",e:"none",t:"Sube solo los hombros, sin jalar el cuello; exhala al subir."},
+{n:"Press de pecho en máquina",g:"push",p:"g",e:"pecho",t:"Ajusta el asiento para que las manos queden a la altura del pecho. Empuja sin despegar la espalda."},
+{n:"Press de hombro en máquina",g:"push",p:"g",e:"hombro",t:"Espalda apoyada, empuja hacia arriba sin bloquear los codos del todo."},
+{n:"Press con mancuernas en banco",g:"push",p:"g",e:"mancg",t:"Escápulas juntas, baja a la altura del pecho y empuja en línea recta."},
+{n:"Tríceps en polea",g:"push",p:"g",e:"polea",t:"Codos pegados al cuerpo, extiende hasta abajo y controla la subida."},
+{n:"Jalón al pecho",g:"pull",p:"g",e:"jalon",t:"Tira la barra hacia la clavícula llevando los codos abajo; no te balancees."},
+{n:"Remo en máquina",g:"pull",p:"g",e:"remo",t:"Pecho apoyado, tira juntando omóplatos y vuelve despacio."},
+{n:"Curl de bíceps en polea",g:"pull",p:"g",e:"polea",t:"Codos fijos a los lados; sube sin impulso."},
+{n:"Peso muerto",g:"pull",p:"g",e:"barra",t:"Barra pegada a las piernas, espalda neutra, empuja el suelo con los pies. Empieza liviano."},
+{n:"Prensa de piernas",g:"legs",p:"g",e:"prensa",t:"Pies al ancho de hombros, baja hasta ~90° sin despegar la cadera y no bloquees las rodillas."},
+{n:"Extensión de piernas",g:"legs",p:"g",e:"ext",t:"Sube hasta estirar casi del todo y baja controlado; no uses impulso."},
+{n:"Curl femoral",g:"legs",p:"g",e:"curl",t:"Cadera pegada al asiento, flexiona y regresa lento."},
+{n:"Sentadilla con mancuerna",g:"legs",p:"g",e:"mancg",t:"Torso erguido, cadera atrás y rodillas alineadas con los pies."},
+{n:"Plancha",g:"core",p:"g",e:"none",t:"Cuerpo en línea recta, abdomen y glúteos apretados."},
+{n:"Caminadora inclinada 10 min",g:"core",p:"g",e:"cardio",t:"Inclinación 6-8%, ritmo de caminata rápida, sin sujetarte de las barras."}
+];
+var S;
+function load(){try{S=JSON.parse(localStorage.getItem("fr")||"null")}catch(e){S=null}if(!S)S={p:null,log:{},meals:{},skip:{}}}
+function save(){try{localStorage.setItem("fr",JSON.stringify(S))}catch(e){}}
+function dk(d){d=d||new Date();return d.getFullYear()+"-"+String(d.getMonth()+1).padStart(2,"0")+"-"+String(d.getDate()).padStart(2,"0")}
+var $=function(s){return document.querySelector(s)};
+var view="hoy",place="h",draft={days:[1,3,5],eqh:[],eqg:[],place:"h"};
+function esc(s){return String(s).replace(/[&<>"]/g,function(c){return{"&":"&amp;","<":"&lt;",">":"&gt;",'"':"&quot;"}[c]})}
+
+function target(){var p=S.p,bmr=10*p.w+6.25*p.h-5*p.a+(p.sex==="m"?5:-161);var tdee=bmr*1.45;return Math.round(p.goal==="perder"?tdee-450:p.goal==="ganar"?tdee+300:tdee)}
+function setsReps(){var g=S.p.goal;return g==="perder"?"3 x 15":g==="ganar"?"4 x 8-10":"3 x 12"}
+function daysPerWeek(){return S.p.days.length||3}
+
+function routine(pl){
+  var done=Object.keys(S.log).filter(function(k){return S.log[k].finished}).length;
+  var eqSet={none:1};(S.p.eqh||[]).forEach(function(k){if(pl==="h")eqSet[k]=1});(S.p.eqg||[]).forEach(function(k){if(pl==="g")eqSet[k]=1});
+  var plan=pl==="h"?[["Cuerpo completo",["push","pull","legs","core"]],["Cuerpo completo B",["legs","pull","push","core"]]]:[["Empuje",["push","push","core"]],["Tira",["pull","pull","core"]],["Pierna",["legs","legs","core"]]];
+  var day=plan[done%plan.length],used={},list=[];
+  day[1].forEach(function(g,i){
+    var pool=EX.filter(function(e){return e.g===g&&e.p===pl&&eqSet[e.e]&&!used[e.n]});
+    if(!pool.length)return;
+    var e=pool[(done+i)%pool.length];used[e.n]=1;list.push(e);
+  });
+  return{name:day[0],list:list};
+}
+
+function nav(){var t=[["hoy","Hoy"],["comida","Comida"],["prog","Progreso"],["perfil","Perfil"]];
+  $("#nav").innerHTML=S.p?t.map(function(x){return'<button class="'+(view===x[0]?"on":"")+'" onclick="go(\''+x[0]+'\')">'+x[1]+'</button>'}).join(""):"";}
+function go(v){view=v;render()}
+
+function render(){nav();var a=$("#app");
+  if(!S.p){a.innerHTML=onboard();return}
+  a.innerHTML=({hoy:vHoy,comida:vComida,prog:vProg,perfil:vPerfil})[view]();
+}
+
+function chips(obj,sel,fn){return'<div class="chips">'+Object.keys(obj).map(function(k){return'<span class="chip '+(sel.indexOf(k)>-1?"on":"")+'" onclick="'+fn+'(\''+k+'\')">'+obj[k]+'</span>'}).join("")+'</div>'}
+function tog(arr,k){var i=arr.indexOf(k);i>-1?arr.splice(i,1):arr.push(k)}
+function tDay(d){tog(draft.days,d);render()}
+function tH(k){tog(draft.eqh,k);render()}
+function tG(k){tog(draft.eqg,k);render()}
+function setPl(v){draft.place=v;render()}
+
+function profileForm(btn){
+  var p=draft;
+  return'<label>Sexo</label><select id="sex"><option value="m"'+(p.sex==="m"?" selected":"")+'>Hombre</option><option value="f"'+(p.sex==="f"?" selected":"")+'>Mujer</option></select>'+
+  '<div class="row"><div><label>Edad</label><input id="age" type="number" inputmode="numeric" value="'+(p.a||"")+'"></div><div><label>Peso (kg)</label><input id="w" type="number" inputmode="decimal" value="'+(p.w||"")+'"></div><div><label>Talla (cm)</label><input id="h" type="number" inputmode="numeric" value="'+(p.h||"")+'"></div></div>'+
+  '<label>Meta</label><select id="goal"><option value="perder"'+(p.goal==="perder"?" selected":"")+'>Bajar grasa</option><option value="mantener"'+(p.goal==="mantener"?" selected":"")+'>Mantenerme y tonificar</option><option value="ganar"'+(p.goal==="ganar"?" selected":"")+'>Ganar músculo</option></select>'+
+  '<label>¿Dónde entrenas?</label><div class="chips"><span class="chip '+(p.place==="h"?"on":"")+'" onclick="setPl(\'h\')">En casa</span><span class="chip '+(p.place==="g"?"on":"")+'" onclick="setPl(\'g\')">En el gym</span><span class="chip '+(p.place==="hg"?"on":"")+'" onclick="setPl(\'hg\')">Ambos</span></div>'+
+  (p.place!=="g"?'<label>Equipo en casa (sin nada = calistenia)</label>'+chips(EQH,p.eqh,"tH"):"")+
+  (p.place!=="h"?'<label>Máquinas disponibles en tu gym</label>'+chips(EQG,p.eqg,"tG"):"")+
+  '<label>Días de entreno</label><div class="chips">'+DAYS.map(function(n,i){return'<span class="chip '+(p.days.indexOf(i)>-1?"on":"")+'" onclick="tDay('+i+')">'+n+'</span>'}).join("")+'</div>'+
+  '<label>Hora del recordatorio</label><input id="rt" type="time" value="'+(p.rt||"18:00")+'">'+
+  '<button class="btn" onclick="saveP()">'+btn+'</button>';
+}
+function readForm(){draft.sex=$("#sex").value;draft.a=+$("#age").value;draft.w=+$("#w").value;draft.h=+$("#h").value;draft.goal=$("#goal").value;draft.rt=$("#rt").value}
+function saveP(){readForm();
+  if(!draft.a||!draft.w||!draft.h){alert("Completa edad, peso y talla.");return}
+  if(!draft.days.length){alert("Elige al menos un día de entreno.");return}
+  var old=S.p;S.p={sex:draft.sex,a:draft.a,w:draft.w,h:draft.h,goal:draft.goal,place:draft.place,eqh:draft.eqh,eqg:draft.eqg,days:draft.days.slice().sort(),rt:draft.rt,start:old?old.start:dk(),wlog:old?old.wlog:{}};
+  S.p.wlog[dk()]=S.p.w;
+  place=S.p.place==="g"?"g":"h";save();view="hoy";render();checkPrompts();}
+
+function onboard(){
+  return'<h1>FitRutina</h1><p class="mute">Cuéntanos de ti y armamos tu rutina y tu plan de comida. Tus datos se guardan en este dispositivo.</p><div class="card">'+profileForm("Crear mi perfil")+'</div>';
+}
+function vPerfil(){
+  draft={sex:S.p.sex,a:S.p.a,w:S.p.w,h:S.p.h,goal:S.p.goal,place:S.p.place,eqh:S.p.eqh.slice(),eqg:S.p.eqg.slice(),days:S.p.days.slice(),rt:S.p.rt};
+  return'<h2>Perfil</h2><div class="card">'+profileForm("Guardar cambios")+'</div>'+
+  '<div class="card"><h3>Copia de seguridad</h3><p class="mute">Guarda tus datos en iCloud o Drive: exporta el archivo y elige la carpeta. Para restaurar, pega el contenido.</p><button class="btn alt" onclick="exp()">Exportar datos</button><button class="btn alt" onclick="imp()">Importar datos</button></div>';
+}
+function exp(){var t=JSON.stringify(S);if(navigator.share){navigator.share({title:"FitRutina",text:t}).catch(function(){})}else{prompt("Copia este texto y guárdalo:",t)}}
+function imp(){var t=prompt("Pega aquí tu copia de seguridad:");if(!t)return;try{var o=JSON.parse(t);if(o&&o.p){S=o;save();render()}else alert("Archivo no válido.")}catch(e){alert("Archivo no válido.")}}
+
+function vHoy(){
+  var k=dk(),L=S.log[k]||(S.log[k]={done:[],finished:false}),isDay=S.p.days.indexOf(new Date().getDay())>-1;
+  var tg=S.p.place==="hg"?'<div class="chips"><span class="chip '+(place==="h"?"on":"")+'" onclick="place=\'h\';render()">Casa</span><span class="chip '+(place==="g"?"on":"")+'" onclick="place=\'g\';render()">Gym</span></div>':"";
+  var R=routine(place),h='<h2>'+(isDay?"Entreno de hoy":"Hoy descansas")+'</h2>';
+  if(!isDay)h+='<p class="mute">Hoy no es día de entreno, pero puedes hacer la rutina si quieres.</p>';
+  h+=tg;
+  if(!R.list.length)return h+'<div class="card">No hay ejercicios para el equipo que marcaste. Ve a Perfil y agrega equipo o máquinas.</div>';
+  h+='<div class="card"><h3>'+R.name+'</h3><div class="mute">'+(place==="h"?"Calistenia en casa":"Gym con máquinas")+' · '+setsReps()+' · descanso 60 s</div></div>';
+  var cur=-1;R.list.forEach(function(e,i){if(cur<0&&L.done.indexOf(e.n)<0)cur=i});
+  R.list.forEach(function(e,i){
+    var d=L.done.indexOf(e.n)>-1,c=i===cur;
+    h+='<div class="card ex '+(d?"done":c?"cur":"")+'"><h3>'+e.n+'</h3><div class="mute">'+setsReps()+'</div>'+
+    (c?'<p>'+e.t+'</p><a href="https://www.youtube.com/results?search_query='+encodeURIComponent(e.n+" técnica correcta")+'" target="_blank" rel="noopener">Ver video de cómo hacerlo</a><button class="btn" onclick="finish('+i+')">Hecho</button>':"")+'</div>';
+  });
+  if(L.finished)h+='<button class="btn alt" onclick="summary()">Ver resumen de hoy</button>';
+  window._R=R;return h;
+}
+function finish(i){
+  var k=dk(),L=S.log[k],R=window._R,e=R.list[i];if(L.done.indexOf(e.n)<0)L.done.push(e.n);
+  if(!L.t0)L.t0=Date.now();
+  if(L.done.length>=R.list.length){L.finished=true;L.t1=Date.now();L.routine=R.name;L.place=place;save();render();summary();return}
+  save();render();
+}
+function summary(){
+  var L=S.log[dk()],min=Math.max(1,Math.round(((L.t1||Date.now())-(L.t0||Date.now()))/60000)),streak=0;
+  for(var i=0;i<60;i++){var d=new Date();d.setDate(d.getDate()-i);var l=S.log[dk(d)];if(l&&l.finished)streak++;else if(i>0)break}
+  modal('<h2>¡Rutina completada!</h2><p><b>'+L.done.length+'</b> ejercicios · aprox. <b>'+min+'</b> min · racha de <b>'+streak+'</b> día(s)</p><p class="mute">Ejercicios: '+L.done.join(", ")+'. Come bien hoy y registra tus comidas.</p><button class="btn" onclick="closeM()">Listo</button>');
+}
+
+function mealsToday(){return S.meals[dk()]||(S.meals[dk()]=[])}
+function vComida(){
+  var ms=mealsToday(),tot=ms.reduce(function(s,m){return s+m.kcal},0),T=target(),pct=Math.min(100,Math.round(tot/T*100));
+  var h='<h2>Comida</h2><div class="card"><div class="big">'+tot+' <span class="mute" style="font-size:18px">/ '+T+' kcal</span></div><div class="bar '+(tot>T?"over":"")+'" style="margin:10px 0"><i style="width:'+pct+'%"></i></div><div class="mute">'+advice(tot,T)+'</div></div>';
+  SLOTS.forEach(function(s){
+    var items=ms.filter(function(m){return m.slot===s[0]});
+    h+='<div class="card"><h3>'+s[0]+' <span class="mute" style="font-size:14px">'+String(s[1]).padStart(2,"0")+':00</span></h3>'+
+    items.map(function(m){return'<div>'+esc(m.name)+' · '+m.kcal+' kcal</div>'}).join("")+
+    '<button class="btn alt" onclick="addMeal(\''+s[0]+'\')">Agregar</button></div>';
+  });
+  return h;
+}
+function advice(tot,T){
+  var hr=new Date().getHours();if(tot===0)return"Aún no registras nada hoy.";
+  var exp=T*Math.min(1,Math.max(.2,(hr-6)/15));
+  if(tot>T)return"Te pasaste de tu meta diaria. Prioriza proteína y verduras en la próxima comida.";
+  if(S.p.goal==="perder"&&tot>exp*1.2)return"Vas por encima del ritmo para tu déficit. Elige comidas más ligeras.";
+  if(hr>=19&&tot<T*.6)return"Vas muy bajo en calorías: comer muy poco frena tu progreso. No te saltes la cena.";
+  return"Vas bien. Sigue registrando para ajustar tu plan.";
+}
+function addMeal(slot){
+  modal('<h3>'+slot+'</h3><label>¿Qué comiste?</label><input id="mn" placeholder="Ej. 2 huevos y pan"><label>Calorías aproximadas</label><input id="mk" type="number" inputmode="numeric" placeholder="Ej. 350"><button class="btn" onclick="saveMeal(\''+slot+'\')">Guardar</button><button class="btn alt" onclick="skipMeal(\''+slot+'\')">No comí / Omitir</button>');
+}
+function saveMeal(slot){var n=$("#mn").value.trim(),k=+$("#mk").value;if(!n||!k){alert("Escribe qué comiste y las calorías.");return}mealsToday().push({slot:slot,name:n,kcal:k});save();closeM();render()}
+function skipMeal(slot){var d=dk();(S.skip[d]=S.skip[d]||[]).push(slot);save();closeM();render()}
+
+function missed(){
+  var out=[];if(!S.p)return out;
+  for(var i=1;i<=7;i++){var d=new Date();d.setDate(d.getDate()-i);var k=dk(d);
+    if(k<S.p.start)continue;
+    if(S.p.days.indexOf(d.getDay())>-1){var l=S.log[k];if(!(l&&(l.finished||l.reason)))out.push(k)}}
+  return out;
+}
+function vProg(){
+  var done=0,miss=0,rs=[];Object.keys(S.log).forEach(function(k){var l=S.log[k];if(l.finished)done++;if(l.reason){miss++;rs.push(k+": "+esc(l.reason))}});
+  var delay=miss*Math.round(7/daysPerWeek());
+  var ws=Object.keys(S.p.wlog).sort();
+  return'<h2>Progreso</h2><div class="row"><div class="card"><div class="big">'+done+'</div><div class="mute">entrenos</div></div><div class="card"><div class="big">'+miss+'</div><div class="mute">faltas</div></div></div>'+
+  '<div class="card"><h3>Tu meta</h3><p>'+(miss?'Entre faltas, tu meta se atrasa aprox. <b>'+delay+' días</b>. Cada sesión que sí haces te acerca.':'Vas al día. Sin faltas, tu meta no se retrasa.')+'</p>'+(rs.length?'<div class="mute">'+rs.join("<br>")+'</div>':"")+'</div>'+
+  '<div class="card"><h3>Peso</h3><div class="mute">'+(ws.map(function(k){return k+": "+S.p.wlog[k]+" kg"}).join("<br>"))+'</div><label>Registrar peso de hoy (kg)</label><input id="nw" type="number" inputmode="decimal"><button class="btn alt" onclick="addW()">Guardar peso</button></div>';
+}
+function addW(){var v=+$("#nw").value;if(!v)return;S.p.w=v;S.p.wlog[dk()]=v;save();render()}
+
+function modal(h){$("#modal").innerHTML='<div class="modal"><div>'+h+'</div></div>'}
+function closeM(){$("#modal").innerHTML=""}
+
+function reasonFor(k){
+  modal('<h3>Faltaste el '+k+'</h3><p>Tu meta se atrasa ~'+Math.round(7/daysPerWeek())+' días por cada sesión perdida. ¿Qué pasó?</p><div class="chips" style="margin-bottom:8px">'+["Sin tiempo","Cansancio","Enfermedad","Sin ganas","Viaje o trabajo"].map(function(r){return'<span class="chip" onclick="setR(\''+k+'\',\''+r+'\')">'+r+'</span>'}).join("")+'</div><input id="ro" placeholder="Otro motivo"><button class="btn" onclick="setR(\''+k+'\',$(\'#ro\').value)">Guardar motivo</button>');
+}
+function setR(k,r){r=(r||"").trim();if(!r){alert("Escribe un motivo.");return}S.log[k]=S.log[k]||{done:[],finished:false};S.log[k].reason=r;save();closeM();render();setTimeout(checkPrompts,300)}
+
+var snooze={};
+function checkPrompts(){
+  if(!S.p||$("#modal").innerHTML)return;
+  var m=missed();if(m.length){reasonFor(m[0]);return}
+  var now=new Date(),hr=now.getHours(),k=dk(),ms=mealsToday(),sk=S.skip[k]||[];
+  for(var i=0;i<SLOTS.length;i++){var s=SLOTS[i];
+    if(hr>=s[1]&&hr<s[1]+3&&!ms.some(function(x){return x.slot===s[0]})&&sk.indexOf(s[0])<0&&!(snooze[s[0]]>Date.now())){
+      snooze[s[0]]=Date.now()+30*60000;
+      try{if("Notification"in window&&Notification.permission==="granted")new Notification("FitRutina",{body:"¿Qué desayunaste/comiste? Registra tu "+s[0].toLowerCase()})}catch(e){}
+      modal('<h3>'+s[0]+'</h3><p>Es hora de registrar lo que comiste.</p><button class="btn" onclick="addMeal(\''+s[0]+'\')">Registrar ahora</button><button class="btn alt" onclick="closeM()">Más tarde</button>');return}
+  }
+  var rt=(S.p.rt||"18:00").split(":"),isDay=S.p.days.indexOf(now.getDay())>-1,l=S.log[k];
+  if(isDay&&!(l&&l.finished)&&(hr*60+now.getMinutes()>=+rt[0]*60+ +rt[1])&&!(snooze.gym>Date.now())){
+    snooze.gym=Date.now()+60*60000;
+    modal('<h3>Hora de entrenar</h3><p>Hoy toca rutina. Un entreno más te acerca a tu meta.</p><button class="btn" onclick="closeM();go(\'hoy\')">Empezar</button><button class="btn alt" onclick="closeM()">Después</button>');
+  }
+}
+load();render();
+try{if(S.p&&"Notification"in window&&Notification.permission==="default")Notification.requestPermission()}catch(e){}
+setTimeout(checkPrompts,800);setInterval(checkPrompts,60000);
+</script>
+<script>if("serviceWorker"in navigator){window.addEventListener("load",function(){navigator.serviceWorker.register("sw.js").catch(function(){})})}</script>
+</body>
+</html>
