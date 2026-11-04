@@ -47,8 +47,8 @@ a{color:var(--acc)}
 .row{display:flex;gap:10px}.row>*{flex:1}
 .figs{display:flex;gap:8px;margin:8px 0}.figs>div{flex:1;text-align:center;font-size:13px;color:var(--mute)}
 .f{width:100%;height:auto;background:var(--bg);border-radius:10px}
-.f line,.f polyline{fill:none;stroke-width:4;stroke-linecap:round;stroke-linejoin:round}
-.f .t,.f .l{stroke:var(--ink)}.f .a{stroke:var(--acc)}.f .e{stroke:var(--mute);stroke-width:3}.f .fl{stroke:var(--line);stroke-width:2}.f circle{fill:var(--ink)}
+.f line,.f polyline{fill:none;stroke-linecap:round;stroke-linejoin:round}
+.f .sk{stroke:#E0AC82}.f .sh{stroke:#2B3140}.f .tp{stroke:var(--acc)}.f .wh{stroke:#F4F4F4}.f .far{filter:brightness(.7)}.f .e{stroke:var(--mute);stroke-width:3}.f .fl{stroke:var(--line);stroke-width:2}
 </style>
 </head>
 <body>
@@ -123,7 +123,7 @@ dips:['<line class="e" x1="8" y1="44" x2="38" y2="44"/>','<line class="e" x1="8"
 lie:['<line class="e" x1="8" y1="56" x2="92" y2="56"/>','<line class="e" x1="8" y1="56" x2="92" y2="56"/>'],
 pullup:['<line class="e" x1="40" y1="10" x2="90" y2="10"/>','<line class="e" x1="40" y1="10" x2="90" y2="10"/>'],
 jalon:['<line class="e" x1="40" y1="58" x2="64" y2="58"/><line class="e" x1="48" y1="4" x2="76" y2="4"/>','<line class="e" x1="40" y1="58" x2="64" y2="58"/><line class="e" x1="48" y1="4" x2="76" y2="4"/>'],
-lunge:['','<polyline class="l" points="60,50 42,66 26,72"/>'],
+lunge:['','<polyline class="far sh" stroke-width="11" points="60,50 42,66"/><polyline class="far sk" stroke-width="8" points="42,66 26,72"/>'],
 chest:['<line class="e" x1="34" y1="20" x2="34" y2="58"/>','<line class="e" x1="34" y1="20" x2="34" y2="58"/>'],
 shp:['<line class="e" x1="32" y1="18" x2="32" y2="58"/>','<line class="e" x1="32" y1="18" x2="32" y2="58"/>'],
 legext:['<line class="e" x1="30" y1="56" x2="54" y2="56"/>','<line class="e" x1="30" y1="56" x2="54" y2="56"/>'],
@@ -133,15 +133,22 @@ walk:['<line class="e" x1="30" y1="74" x2="90" y2="74"/>','<line class="e" x1="3
 dl:['<line class="e" x1="64" y1="66" x2="76" y2="66"/>','<line class="e" x1="54" y1="54" x2="66" y2="54"/>']};
 var VIS={"Flexiones":"flex","Fondos en banco":"dips","Press con mancuernas en suelo":"lie","Pike push-up":"pike","Dominadas":"pullup","Remo con mancuerna":"row","Remo con banda":"row","Superman":"superman","Sentadillas":"squat","Zancadas":"lunge","Puente de glúteo":"bridge","Sentadilla goblet":"squat","Plancha":"plank","Crunch abdominal":"crunch","Press de pecho en máquina":"chest","Press de hombro en máquina":"shp","Press con mancuernas en banco":"lie","Tríceps en polea":"tri","Jalón al pecho":"jalon","Remo en máquina":"seatrow","Curl de bíceps en polea":"curl","Peso muerto":"dl","Prensa de piernas":"lpress","Extensión de piernas":"legext","Curl femoral":"legcurl","Sentadilla con mancuerna":"squat","Caminadora inclinada 10 min":"walk"};
 function slug(n){return n.toLowerCase().normalize("NFD").replace(/[\u0300-\u036f]/g,"").replace(/[^a-z0-9]+/g,"-").replace(/^-|-$/g,"")}
+function seg(x1,y1,x2,y2,c,w){return'<line class="'+c+'" stroke-width="'+w+'" x1="'+x1+'" y1="'+y1+'" x2="'+x2+'" y2="'+y2+'"/>'}
+function body(a){
+  var d=(a[0]-a[2])>=-5?1:-1,o="";
+  o+='<g class="far" transform="translate(-4,0)">'+seg(a[4],a[5],a[10],a[11],"sh",12)+seg(a[10],a[11],a[12],a[13],"sk",8)+seg(a[12],a[13],a[12]+d*7,a[13],"wh",6)+'</g>';
+  o+='<g class="far" transform="translate(3,-2)">'+seg(a[2],a[3],a[6],a[7],"tp",9)+seg(a[6],a[7],a[8],a[9],"sk",6.5)+'</g>';
+  o+=seg(a[2],a[3],a[4],a[5],"tp",15)+seg(a[2],a[3],a[0],a[1],"sk",6);
+  o+=seg(a[4],a[5],a[10],a[11],"sh",12)+seg(a[10],a[11],a[12],a[13],"sk",8)+seg(a[12],a[13],a[12]+d*7,a[13],"wh",6);
+  o+=seg(a[2],a[3],a[6],a[7],"tp",9)+seg(a[6],a[7],a[8],a[9],"sk",6.5)+'<circle cx="'+a[8]+'" cy="'+a[9]+'" r="3.6" fill="#E0AC82"/>';
+  o+='<circle cx="'+a[0]+'" cy="'+a[1]+'" r="7.6" fill="#3B2A20"/><circle cx="'+(a[0]+d*1.6)+'" cy="'+(a[1]+1.3)+'" r="6.2" fill="#E0AC82"/>';
+  return o}
 function fig(n){
   var k=VIS[n];if(!k)return"";var o='<div class="figs">';
   for(var i=0;i<2;i++){var a=POSE[k][i],x=(EXTRA[k]||["",""])[i];
     var sl=slug(n)+"-"+i;
     o+='<div><svg class="f" viewBox="0 0 120 80" role="img" aria-label="'+(i?"Final":"Inicio")+' de '+esc(n)+'"><line class="fl" x1="0" y1="75" x2="120" y2="75"/>'+x+
-    '<line class="t" x1="'+a[2]+'" y1="'+a[3]+'" x2="'+a[4]+'" y2="'+a[5]+'"/>'+
-    '<polyline class="l" points="'+a[4]+','+a[5]+' '+a[10]+','+a[11]+' '+a[12]+','+a[13]+'"/>'+
-    '<polyline class="a" points="'+a[2]+','+a[3]+' '+a[6]+','+a[7]+' '+a[8]+','+a[9]+'"/>'+
-    '<circle cx="'+a[0]+'" cy="'+a[1]+'" r="6"/></svg><img alt="'+esc(n)+'" src="images/'+sl+'.jpg" style="display:none;width:100%;aspect-ratio:3/2;object-fit:cover;border-radius:10px" onload="this.previousSibling.style.display=\'none\';this.style.display=\'block\'">'+(i?"Final":"Inicio")+'</div>';}
+    body(a)+'</svg><img alt="'+esc(n)+'" src="images/'+sl+'.jpg" style="display:none;width:100%;aspect-ratio:3/2;object-fit:cover;border-radius:10px" onload="this.previousSibling.style.display=\'none\';this.style.display=\'block\'">'+(i?"Final":"Inicio")+'</div>';}
   return o+'</div>';
 }
 var S;
@@ -230,7 +237,7 @@ function vHoy(){
   R.list.forEach(function(e,i){
     var d=L.done.indexOf(e.n)>-1,c=i===cur;
     h+='<div class="card ex '+(d?"done":c?"cur":"")+'"><h3>'+e.n+'</h3><div class="mute">'+setsReps()+'</div>'+
-    (c?'<p>'+e.t+'</p>'+fig(e.n)+'<button class="btn" onclick="finish('+i+')">Hecho</button>':"")+'</div>';
+    (c?'<p>'+e.t+'</p>'+fig(e.n)+'<a style="display:block;margin:6px 0" href="https://www.youtube.com/results?search_query='+encodeURIComponent(e.n+" técnica correcta")+'" target="_blank" rel="noopener">▶ Ver video en YouTube (necesita internet)</a><button class="btn" onclick="finish('+i+')">Hecho</button>':"")+'</div>';
   });
   if(L.finished)h+='<button class="btn alt" onclick="summary()">Ver resumen de hoy</button>';
   window._R=R;return h;
