@@ -132,14 +132,16 @@ lpress:['<line class="e" x1="82" y1="40" x2="78" y2="64"/>','<line class="e" x1=
 walk:['<line class="e" x1="30" y1="74" x2="90" y2="74"/>','<line class="e" x1="30" y1="74" x2="90" y2="74"/>'],
 dl:['<line class="e" x1="64" y1="66" x2="76" y2="66"/>','<line class="e" x1="54" y1="54" x2="66" y2="54"/>']};
 var VIS={"Flexiones":"flex","Fondos en banco":"dips","Press con mancuernas en suelo":"lie","Pike push-up":"pike","Dominadas":"pullup","Remo con mancuerna":"row","Remo con banda":"row","Superman":"superman","Sentadillas":"squat","Zancadas":"lunge","Puente de glúteo":"bridge","Sentadilla goblet":"squat","Plancha":"plank","Crunch abdominal":"crunch","Press de pecho en máquina":"chest","Press de hombro en máquina":"shp","Press con mancuernas en banco":"lie","Tríceps en polea":"tri","Jalón al pecho":"jalon","Remo en máquina":"seatrow","Curl de bíceps en polea":"curl","Peso muerto":"dl","Prensa de piernas":"lpress","Extensión de piernas":"legext","Curl femoral":"legcurl","Sentadilla con mancuerna":"squat","Caminadora inclinada 10 min":"walk"};
+function slug(n){return n.toLowerCase().normalize("NFD").replace(/[\u0300-\u036f]/g,"").replace(/[^a-z0-9]+/g,"-").replace(/^-|-$/g,"")}
 function fig(n){
   var k=VIS[n];if(!k)return"";var o='<div class="figs">';
   for(var i=0;i<2;i++){var a=POSE[k][i],x=(EXTRA[k]||["",""])[i];
+    var sl=slug(n)+"-"+i;
     o+='<div><svg class="f" viewBox="0 0 120 80" role="img" aria-label="'+(i?"Final":"Inicio")+' de '+esc(n)+'"><line class="fl" x1="0" y1="75" x2="120" y2="75"/>'+x+
     '<line class="t" x1="'+a[2]+'" y1="'+a[3]+'" x2="'+a[4]+'" y2="'+a[5]+'"/>'+
     '<polyline class="l" points="'+a[4]+','+a[5]+' '+a[10]+','+a[11]+' '+a[12]+','+a[13]+'"/>'+
     '<polyline class="a" points="'+a[2]+','+a[3]+' '+a[6]+','+a[7]+' '+a[8]+','+a[9]+'"/>'+
-    '<circle cx="'+a[0]+'" cy="'+a[1]+'" r="6"/></svg>'+(i?"Final":"Inicio")+'</div>';}
+    '<circle cx="'+a[0]+'" cy="'+a[1]+'" r="6"/></svg><img alt="'+esc(n)+'" src="images/'+sl+'.jpg" style="display:none;width:100%;aspect-ratio:3/2;object-fit:cover;border-radius:10px" onload="this.previousSibling.style.display=\'none\';this.style.display=\'block\'">'+(i?"Final":"Inicio")+'</div>';}
   return o+'</div>';
 }
 var S;
