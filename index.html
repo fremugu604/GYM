@@ -42,7 +42,7 @@ nav button.on{color:var(--acc)}
 .bar i{display:block;height:100%;background:var(--acc)}
 .bar.over i{background:var(--warn)}
 .modal{position:fixed;inset:0;background:rgba(0,0,0,.55);display:flex;align-items:flex-end;justify-content:center;z-index:20}
-.modal>div{background:var(--card);width:100%;max-width:520px;border-radius:18px 18px 0 0;padding:18px 18px calc(18px + env(safe-area-inset-bottom,0px))}
+.modal>div{max-height:88vh;overflow:auto;background:var(--card);width:100%;max-width:520px;border-radius:18px 18px 0 0;padding:18px 18px calc(18px + env(safe-area-inset-bottom,0px))}
 a{color:var(--acc)}
 .row{display:flex;gap:10px}.row>*{flex:1}
 .figs{display:flex;gap:8px;margin:8px 0}.figs>div{flex:1;text-align:center;font-size:13px;color:var(--mute)}
@@ -153,7 +153,7 @@ var view="hoy",place="h",draft={days:[1,3,5],eqh:[],eqg:[],place:"h"};
 function esc(s){return String(s).replace(/[&<>"]/g,function(c){return{"&":"&amp;","<":"&lt;",">":"&gt;",'"':"&quot;"}[c]})}
 
 function ageOf(p){if(!p.b)return p.a||30;var b=p.b.split("-"),n=new Date(),a=n.getFullYear()-+b[0];if(n.getMonth()+1<+b[1]||(n.getMonth()+1===+b[1]&&n.getDate()<+b[2]))a--;return a}
-function target(){var p=S.p,bmr=10*p.w+6.25*p.h-5*ageOf(p)+(p.sex==="m"?5:-161);var tdee=bmr*1.45;return Math.round(p.goal==="perder"?tdee-450:p.goal==="ganar"?tdee+300:tdee)}
+function target(){var p=S.p,bmr=10*p.w+6.25*p.h-5*ageOf(p)+(p.sex==="m"?5:-161);var tdee=bmr*1.45;return Math.max(Math.round(p.goal==="perder"?tdee-450:p.goal==="ganar"?tdee+300:tdee),p.sex==="m"?1500:1200)}
 function setsReps(){var g=S.p.goal;return g==="perder"?"3 x 15":g==="ganar"?"4 x 8-10":"3 x 12"}
 function daysPerWeek(){return S.p.days.length||3}
 
@@ -250,11 +250,11 @@ function summary(){
 function mealsToday(){return S.meals[dk()]||(S.meals[dk()]=[])}
 function vComida(){
   var ms=mealsToday(),tot=ms.reduce(function(s,m){return s+m.kcal},0),T=target(),pct=Math.min(100,Math.round(tot/T*100));
-  var h='<h2>Comida</h2><div class="card"><div class="big">'+tot+' <span class="mute" style="font-size:18px">/ '+T+' kcal</span></div><div class="bar '+(tot>T?"over":"")+'" style="margin:10px 0"><i style="width:'+pct+'%"></i></div><div class="mute">'+advice(tot,T)+'</div></div>';
+  var h='<h2>Comida</h2><div class="card"><div class="big">'+tot+' <span class="mute" style="font-size:18px">/ '+T+' kcal</span></div><div class="bar '+(tot>T?"over":"")+'" style="margin:10px 0"><i style="width:'+pct+'%"></i></div><div class="mute">'+advice(tot,T)+'</div><details class="mute" style="margin-top:8px"><summary>¿Cómo se calcula?</summary><p>Metabolismo basal (fórmula Mifflin-St Jeor) x 1.45 de actividad. Para bajar grasa se restan 450 kcal y para ganar músculo se suman 300. Mínimo: 1500 (hombre) o 1200 (mujer). Es un estimado.</p></details></div>';
   SLOTS.forEach(function(s){
     var items=ms.filter(function(m){return m.slot===s[0]});
     h+='<div class="card"><h3>'+s[0]+' <span class="mute" style="font-size:14px">'+String(s[1]).padStart(2,"0")+':00</span></h3>'+
-    items.map(function(m){return'<div>'+esc(m.name)+' · '+m.kcal+' kcal</div>'}).join("")+
+    items.map(function(m){return'<div style="display:flex;justify-content:space-between;gap:8px;margin:4px 0"><span>'+esc(m.name)+' · '+m.kcal+' kcal</span><a onclick="delMeal('+ms.indexOf(m)+')">Quitar</a></div>'}).join("")+
     '<button class="btn alt" onclick="addMeal(\''+s[0]+'\')">Agregar</button></div>';
   });
   return h;
@@ -267,10 +267,26 @@ function advice(tot,T){
   if(hr>=19&&tot<T*.6)return"Vas muy bajo en calorías: comer muy poco frena tu progreso. No te saltes la cena.";
   return"Vas bien. Sigue registrando para ajustar tu plan.";
 }
-function addMeal(slot){
-  modal('<h3>'+slot+'</h3><label>¿Qué comiste?</label><input id="mn" placeholder="Ej. 2 huevos y pan"><label>Calorías aproximadas</label><input id="mk" type="number" inputmode="numeric" placeholder="Ej. 350"><button class="btn" onclick="saveMeal(\''+slot+'\')">Guardar</button><button class="btn alt" onclick="skipMeal(\''+slot+'\')">No comí / Omitir</button>');
-}
-function saveMeal(slot){var n=$("#mn").value.trim(),k=+$("#mk").value;if(!n||!k){alert("Escribe qué comiste y las calorías.");return}mealsToday().push({slot:slot,name:n,kcal:k});save();closeM();render()}
+var FOODS=[["Huevo hervido", "1 unidad", 75], ["Huevo frito", "1 unidad", 95], ["Huevo revuelto", "1 unidad", 95], ["Arepa de maíz", "1 mediana", 160], ["Pan tajado", "1 tajada", 70], ["Pan francés", "1 unidad", 150], ["Pan de queso", "1 unidad", 110], ["Tostada integral", "1 tajada", 70], ["Avena en agua", "1 taza", 160], ["Granola", "1 porción", 200], ["Cereal con leche", "1 tazón", 220], ["Leche entera", "1 vaso", 150], ["Leche descremada", "1 vaso", 90], ["Yogur natural", "1 vaso", 120], ["Yogur griego", "1 pote", 130], ["Queso fresco", "1 porción", 80], ["Queso tajado", "1 tajada", 70], ["Mantequilla", "1 cucharadita", 35], ["Aguacate", "1/2 unidad", 120], ["Café negro", "1 taza", 5], ["Café con leche", "1 taza", 60], ["Chocolate caliente", "1 taza", 200], ["Jugo natural", "1 vaso", 110], ["Banano", "1 unidad", 105], ["Manzana", "1 unidad", 95], ["Naranja", "1 unidad", 65], ["Mandarina", "1 unidad", 45], ["Mango", "1 taza", 100], ["Papaya", "1 taza", 60], ["Fresas", "1 taza", 50], ["Uvas", "1 taza", 100], ["Sandía", "1 taza", 45], ["Piña", "1 taza", 80], ["Ensalada de frutas", "1 taza", 100], ["Arroz blanco", "1 taza cocido", 205], ["Arroz integral", "1 taza cocido", 215], ["Pasta cocida", "1 taza", 200], ["Papa cocida", "1 mediana", 160], ["Papa frita", "1 porción", 320], ["Yuca cocida", "1 porción", 160], ["Plátano maduro frito", "1 porción", 180], ["Patacón", "1 unidad", 120], ["Frijoles cocidos", "1 taza", 230], ["Lentejas cocidas", "1 taza", 230], ["Garbanzos cocidos", "1 taza", 270], ["Mazorca de maíz", "1 unidad", 130], ["Tortilla de maíz", "1 unidad", 65], ["Pechuga de pollo a la plancha", "1 porción (120 g)", 200], ["Pollo frito", "1 presa", 250], ["Carne de res asada", "1 porción (120 g)", 280], ["Carne molida guisada", "1 porción (120 g)", 250], ["Cerdo asado", "1 porción (120 g)", 300], ["Pescado a la plancha", "1 filete", 180], ["Atún en lata (agua)", "1 lata", 120], ["Jamón", "1 lonja", 35], ["Salchicha", "1 unidad", 140], ["Chorizo", "1 unidad", 250], ["Proteína en polvo", "1 scoop", 120], ["Ensalada mixta (sin aderezo)", "1 plato", 60], ["Brócoli cocido", "1 taza", 55], ["Zanahoria", "1 unidad", 30], ["Sopa de verduras", "1 plato", 120], ["Sancocho", "1 plato", 350], ["Hamburguesa", "1 unidad", 550], ["Pizza", "1 porción", 280], ["Perro caliente", "1 unidad", 350], ["Empanada", "1 unidad", 250], ["Papas de bolsa", "1 bolsa", 150], ["Galletas dulces", "3 unidades", 150], ["Chocolate en barra", "1 porción", 160], ["Helado", "1 bola", 140], ["Gaseosa", "1 vaso", 100], ["Cerveza", "1 lata", 150], ["Mantequilla de maní", "1 cucharada", 95], ["Almendras o nueces", "1 puñado", 165], ["Barra de cereal", "1 unidad", 120]];
+var basket=[],mslot="";
+function nrm(t){return t.toLowerCase().normalize("NFD").replace(/[\u0300-\u036f]/g,"")}
+function addMeal(slot){mslot=slot;basket=[];
+  modal('<h3>'+slot+'</h3><input id="fq" placeholder="Busca un alimento (ej. arroz, huevo)" oninput="fres(this.value)"><div id="fr" class="chips" style="margin:10px 0;max-height:150px;overflow:auto"></div><div id="fb"></div><button class="btn" onclick="saveMeal()">Guardar comida</button><button class="btn alt" onclick="skipMeal(\''+slot+'\')">No comí / Omitir</button>');
+  fres("");fbask();}
+function fres(q){var n=nrm(q.trim()),r=[];
+  FOODS.forEach(function(f,i){if(!n||nrm(f[0]).indexOf(n)>-1)r.push(i)});
+  $("#fr").innerHTML=r.slice(0,14).map(function(i){return'<span class="chip" onclick="pick('+i+')">'+FOODS[i][0]+' · '+FOODS[i][1]+' · '+FOODS[i][2]+' kcal</span>'}).join("")+'<span class="chip" onclick="manual()">Otro: escribir calorías</span>';}
+function pick(i){var f=basket.filter(function(b){return b.i===i})[0];if(f)f.q+=1;else basket.push({i:i,q:1});fbask()}
+function manual(){var n=prompt("¿Qué comiste?"),k=+prompt("Calorías aproximadas:");if(n&&k){basket.push({m:1,name:n,kcal:k,q:1});fbask()}}
+function qty(j,d){basket[j].q+=d;if(basket[j].q<=0)basket.splice(j,1);fbask()}
+function bItem(b){return b.m?{name:b.name,por:"porción",kcal:b.kcal}:{name:FOODS[b.i][0],por:FOODS[b.i][1],kcal:FOODS[b.i][2]}}
+function fbask(){var t=0,h=basket.map(function(b,j){var f=bItem(b),k=Math.round(f.kcal*b.q);t+=k;
+  return'<div style="display:flex;gap:8px;align-items:center;margin:6px 0"><div style="flex:1"><b>'+esc(f.name)+'</b><div class="mute">'+b.q+' x '+f.por+' = '+k+' kcal</div></div><span class="chip" onclick="qty('+j+',-.5)">−</span><span class="chip" onclick="qty('+j+',.5)">+</span></div>'}).join("");
+  $("#fb").innerHTML=h+(basket.length?'<div style="margin-top:6px"><b>Total: '+t+' kcal</b></div>':'<div class="mute">Toca un alimento para agregarlo. Usa + y − para cambiar la porción.</div>');}
+function saveMeal(){if(!basket.length){alert("Agrega al menos un alimento.");return}
+  basket.forEach(function(b){var f=bItem(b);mealsToday().push({slot:mslot,name:f.name+" ("+b.q+" x "+f.por+")",kcal:Math.round(f.kcal*b.q)})});
+  save();closeM();render()}
+function delMeal(i){mealsToday().splice(i,1);save();render()}
 function skipMeal(slot){var d=dk();(S.skip[d]=S.skip[d]||[]).push(slot);save();closeM();render()}
 
 function missed(){
