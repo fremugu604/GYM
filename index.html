@@ -150,7 +150,8 @@ var $=function(s){return document.querySelector(s)};
 var view="hoy",place="h",draft={days:[1,3,5],eqh:[],eqg:[],place:"h"};
 function esc(s){return String(s).replace(/[&<>"]/g,function(c){return{"&":"&amp;","<":"&lt;",">":"&gt;",'"':"&quot;"}[c]})}
 
-function target(){var p=S.p,bmr=10*p.w+6.25*p.h-5*p.a+(p.sex==="m"?5:-161);var tdee=bmr*1.45;return Math.round(p.goal==="perder"?tdee-450:p.goal==="ganar"?tdee+300:tdee)}
+function ageOf(p){if(!p.b)return p.a||30;var b=p.b.split("-"),n=new Date(),a=n.getFullYear()-+b[0];if(n.getMonth()+1<+b[1]||(n.getMonth()+1===+b[1]&&n.getDate()<+b[2]))a--;return a}
+function target(){var p=S.p,bmr=10*p.w+6.25*p.h-5*ageOf(p)+(p.sex==="m"?5:-161);var tdee=bmr*1.45;return Math.round(p.goal==="perder"?tdee-450:p.goal==="ganar"?tdee+300:tdee)}
 function setsReps(){var g=S.p.goal;return g==="perder"?"3 x 15":g==="ganar"?"4 x 8-10":"3 x 12"}
 function daysPerWeek(){return S.p.days.length||3}
 
@@ -169,7 +170,8 @@ function routine(pl){
 
 function nav(){var t=[["hoy","Hoy"],["comida","Comida"],["prog","Progreso"],["perfil","Perfil"]];
   $("#nav").innerHTML=S.p?t.map(function(x){return'<button class="'+(view===x[0]?"on":"")+'" onclick="go(\''+x[0]+'\')">'+x[1]+'</button>'}).join(""):"";}
-function go(v){view=v;render()}
+function initDraft(){draft={sex:S.p.sex,b:S.p.b,w:S.p.w,h:S.p.h,goal:S.p.goal,place:S.p.place,eqh:S.p.eqh.slice(),eqg:S.p.eqg.slice(),days:S.p.days.slice(),rt:S.p.rt}}
+function go(v){view=v;if(v==="perfil"&&S.p)initDraft();render()}
 
 function render(){nav();var a=$("#app");
   if(!S.p){a.innerHTML=onboard();return}
@@ -178,15 +180,16 @@ function render(){nav();var a=$("#app");
 
 function chips(obj,sel,fn){return'<div class="chips">'+Object.keys(obj).map(function(k){return'<span class="chip '+(sel.indexOf(k)>-1?"on":"")+'" onclick="'+fn+'(\''+k+'\')">'+obj[k]+'</span>'}).join("")+'</div>'}
 function tog(arr,k){var i=arr.indexOf(k);i>-1?arr.splice(i,1):arr.push(k)}
-function tDay(d){tog(draft.days,d);render()}
-function tH(k){tog(draft.eqh,k);render()}
-function tG(k){tog(draft.eqg,k);render()}
-function setPl(v){draft.place=v;render()}
+function sync(){if($("#bd"))readForm()}
+function tDay(d){sync();tog(draft.days,d);render()}
+function tH(k){sync();tog(draft.eqh,k);render()}
+function tG(k){sync();tog(draft.eqg,k);render()}
+function setPl(v){sync();draft.place=v;render()}
 
 function profileForm(btn){
   var p=draft;
   return'<label>Sexo</label><select id="sex"><option value="m"'+(p.sex==="m"?" selected":"")+'>Hombre</option><option value="f"'+(p.sex==="f"?" selected":"")+'>Mujer</option></select>'+
-  '<div class="row"><div><label>Edad</label><input id="age" type="number" inputmode="numeric" value="'+(p.a||"")+'"></div><div><label>Peso (kg)</label><input id="w" type="number" inputmode="decimal" value="'+(p.w||"")+'"></div><div><label>Talla (cm)</label><input id="h" type="number" inputmode="numeric" value="'+(p.h||"")+'"></div></div>'+
+  '<label>Fecha de cumpleaños</label><input id="bd" type="date" max="'+dk()+'" value="'+(p.b||"")+'"><div class="row"><div><label>Peso (kg)</label><input id="w" type="number" inputmode="decimal" value="'+(p.w||"")+'"></div><div><label>Talla (cm)</label><input id="h" type="number" inputmode="numeric" value="'+(p.h||"")+'"></div></div>'+
   '<label>Meta</label><select id="goal"><option value="perder"'+(p.goal==="perder"?" selected":"")+'>Bajar grasa</option><option value="mantener"'+(p.goal==="mantener"?" selected":"")+'>Mantenerme y tonificar</option><option value="ganar"'+(p.goal==="ganar"?" selected":"")+'>Ganar músculo</option></select>'+
   '<label>¿Dónde entrenas?</label><div class="chips"><span class="chip '+(p.place==="h"?"on":"")+'" onclick="setPl(\'h\')">En casa</span><span class="chip '+(p.place==="g"?"on":"")+'" onclick="setPl(\'g\')">En el gym</span><span class="chip '+(p.place==="hg"?"on":"")+'" onclick="setPl(\'hg\')">Ambos</span></div>'+
   (p.place!=="g"?'<label>Equipo en casa (sin nada = calistenia)</label>'+chips(EQH,p.eqh,"tH"):"")+
@@ -195,11 +198,11 @@ function profileForm(btn){
   '<label>Hora del recordatorio</label><input id="rt" type="time" value="'+(p.rt||"18:00")+'">'+
   '<button class="btn" onclick="saveP()">'+btn+'</button>';
 }
-function readForm(){draft.sex=$("#sex").value;draft.a=+$("#age").value;draft.w=+$("#w").value;draft.h=+$("#h").value;draft.goal=$("#goal").value;draft.rt=$("#rt").value}
+function readForm(){draft.sex=$("#sex").value;draft.b=$("#bd").value;draft.w=+$("#w").value;draft.h=+$("#h").value;draft.goal=$("#goal").value;draft.rt=$("#rt").value}
 function saveP(){readForm();
-  if(!draft.a||!draft.w||!draft.h){alert("Completa edad, peso y talla.");return}
+  if(!draft.b||!draft.w||!draft.h){alert("Completa cumpleaños, peso y talla.");return}
   if(!draft.days.length){alert("Elige al menos un día de entreno.");return}
-  var old=S.p;S.p={sex:draft.sex,a:draft.a,w:draft.w,h:draft.h,goal:draft.goal,place:draft.place,eqh:draft.eqh,eqg:draft.eqg,days:draft.days.slice().sort(),rt:draft.rt,start:old?old.start:dk(),wlog:old?old.wlog:{}};
+  var old=S.p;S.p={sex:draft.sex,b:draft.b,w:draft.w,h:draft.h,goal:draft.goal,place:draft.place,eqh:draft.eqh,eqg:draft.eqg,days:draft.days.slice().sort(),rt:draft.rt,bmsg:old?old.bmsg:0,start:old?old.start:dk(),wlog:old?old.wlog:{}};
   S.p.wlog[dk()]=S.p.w;
   place=S.p.place==="g"?"g":"h";save();view="hoy";render();checkPrompts();}
 
@@ -207,7 +210,6 @@ function onboard(){
   return'<h1>FitRutina</h1><p class="mute">Cuéntanos de ti y armamos tu rutina y tu plan de comida. Tus datos se guardan en este dispositivo.</p><div class="card">'+profileForm("Crear mi perfil")+'</div>';
 }
 function vPerfil(){
-  draft={sex:S.p.sex,a:S.p.a,w:S.p.w,h:S.p.h,goal:S.p.goal,place:S.p.place,eqh:S.p.eqh.slice(),eqg:S.p.eqg.slice(),days:S.p.days.slice(),rt:S.p.rt};
   return'<h2>Perfil</h2><div class="card">'+profileForm("Guardar cambios")+'</div>'+
   '<div class="card"><h3>Copia de seguridad</h3><p class="mute">Guarda tus datos en iCloud o Drive: exporta el archivo y elige la carpeta. Para restaurar, pega el contenido.</p><button class="btn alt" onclick="exp()">Exportar datos</button><button class="btn alt" onclick="imp()">Importar datos</button></div>';
 }
@@ -297,6 +299,11 @@ function setR(k,r){r=(r||"").trim();if(!r){alert("Escribe un motivo.");return}S.
 var snooze={};
 function checkPrompts(){
   if(!S.p||$("#modal").innerHTML)return;
+  var bn=new Date();
+  if(S.p.b&&S.p.b.slice(5)===dk().slice(5)&&S.p.bmsg!==bn.getFullYear()){
+    S.p.bmsg=bn.getFullYear();save();
+    try{if("Notification"in window&&Notification.permission==="granted")new Notification("¡Feliz cumpleaños!",{body:"Hoy cumples "+ageOf(S.p)+" años. ¡Sigue con tus metas fit!"})}catch(e){}
+    modal('<h2>🎉 ¡Feliz cumpleaños!</h2><p>Hoy cumples <b>'+ageOf(S.p)+'</b> años. Cada entreno y cada comida que registras es un regalo para tu yo del futuro.</p><p>Sigue adelante: lo estás haciendo muy bien y lo mejor de tu camino fit apenas empieza. ¡Disfruta tu día y a por tus metas!</p><button class="btn" onclick="closeM()">¡Gracias!</button>');return}
   var m=missed();if(m.length){reasonFor(m[0]);return}
   var now=new Date(),hr=now.getHours(),k=dk(),ms=mealsToday(),sk=S.skip[k]||[];
   for(var i=0;i<SLOTS.length;i++){var s=SLOTS[i];
