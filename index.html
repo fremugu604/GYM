@@ -12,10 +12,10 @@
 <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
 <meta name="theme-color" content="#17181A">
 <style>
-:root{--bg:#ECEDE8;--card:#fff;--ink:#17181A;--mute:#6A6E73;--acc:#2B59FF;--accink:#fff;--ok:#1F9D55;--line:#D6D8D2;--warn:#C2410C;
+:root{--bg:#ECEDE8;--card:#fff;--ink:#17181A;--mute:#6A6E73;--acc:#2B59FF;--accink:#fff;--ok:#1F9D55;--line:#D6D8D2;--warn:#C2410C;--red:#D92D20;
 box-sizing:border-box;padding-top:env(safe-area-inset-top,0px);padding-bottom:env(safe-area-inset-bottom,0px);color-scheme:light}
-@media (prefers-color-scheme:dark){:root:not([data-theme="light"]){--bg:#121315;--card:#1C1E21;--ink:#F1F2EE;--mute:#9A9EA3;--acc:#6C8BFF;--accink:#0B0C0E;--ok:#46C37B;--line:#2E3135;--warn:#F59E5B;color-scheme:dark}}
-:root[data-theme="dark"]{--bg:#121315;--card:#1C1E21;--ink:#F1F2EE;--mute:#9A9EA3;--acc:#6C8BFF;--accink:#0B0C0E;--ok:#46C37B;--line:#2E3135;--warn:#F59E5B;color-scheme:dark}
+@media (prefers-color-scheme:dark){:root:not([data-theme="light"]){--bg:#121315;--card:#1C1E21;--ink:#F1F2EE;--mute:#9A9EA3;--acc:#6C8BFF;--accink:#0B0C0E;--ok:#46C37B;--line:#2E3135;--warn:#F59E5B;--red:#FF6B6B;color-scheme:dark}}
+:root[data-theme="dark"]{--bg:#121315;--card:#1C1E21;--ink:#F1F2EE;--mute:#9A9EA3;--acc:#6C8BFF;--accink:#0B0C0E;--ok:#46C37B;--line:#2E3135;--warn:#F59E5B;--red:#FF6B6B;color-scheme:dark}
 html{scroll-padding-top:env(safe-area-inset-top,0px)}
 *{box-sizing:border-box}
 body{margin:0;background:var(--bg);color:var(--ink);font:500 16px/1.4 Barlow,system-ui,sans-serif;padding-bottom:78px}
@@ -49,6 +49,10 @@ a{color:var(--acc)}
 .f{width:100%;height:auto;background:var(--bg);border-radius:10px}
 .f line,.f polyline{fill:none;stroke-linecap:round;stroke-linejoin:round}
 .f .sk{stroke:#E0AC82}.f .sh{stroke:#2B3140}.f .tp{stroke:var(--acc)}.f .wh{stroke:#F4F4F4}.f .far{filter:brightness(.7)}.f .e{stroke:var(--mute);stroke-width:3}.f .fl{stroke:var(--line);stroke-width:2}
+.cal{display:grid;grid-template-columns:repeat(7,1fr);gap:4px}.cdh{text-align:center;font-size:12px;color:var(--mute)}
+.cd{border:1px solid var(--line);border-radius:8px;min-height:46px;padding:3px 0;text-align:center;font-size:11px;color:var(--mute);display:flex;flex-direction:column;align-items:center;justify-content:center;line-height:1.2}
+.cd b{font-size:13px;color:var(--ink)}.cd em{font-style:normal;font-size:16px}.cd.today{border:2px solid var(--acc)}.cd.red,.cd.red b{color:var(--red);font-weight:700}.cd.red{border-color:var(--red)}
+.cal-h{display:flex;justify-content:space-between;align-items:center;margin-bottom:6px}
 </style>
 </head>
 <body>
@@ -233,7 +237,8 @@ function vPerfil(){
 function exp(){var t=JSON.stringify(S);if(navigator.share){navigator.share({title:"FitRutina",text:t}).catch(function(){})}else{prompt("Copia este texto y guárdalo:",t)}}
 function imp(){var t=prompt("Pega aquí tu copia de seguridad:");if(!t)return;try{var o=JSON.parse(t);if(o&&o.p){S=o;save();render()}else alert("Archivo no válido.")}catch(e){alert("Archivo no válido.")}}
 
-function vHoy(){
+function vHoy(){return vHoy0()+calCard("h")}
+function vHoy0(){
   var k=dk(),L=S.log[k]||(S.log[k]={done:[],finished:false}),isDay=S.p.days.indexOf(new Date().getDay())>-1;
   var tg=S.p.place==="hg"?'<div class="chips"><span class="chip '+(place==="h"?"on":"")+'" onclick="place=\'h\';render()">Casa</span><span class="chip '+(place==="g"?"on":"")+'" onclick="place=\'g\';render()">Gym</span></div>':"";
   var R=routine(place),h='<h2>'+(isDay?"Entreno de hoy":"Hoy descansas")+'</h2>';
@@ -266,6 +271,7 @@ function mealsToday(){return S.meals[dk()]||(S.meals[dk()]=[])}
 function vComida(){
   var ms=mealsToday(),tot=ms.reduce(function(s,m){return s+m.kcal},0),T=target(),pct=Math.min(100,Math.round(tot/T*100));
   var h='<h2>Comida</h2>'+waterCard()+'<div class="card"><div class="big">'+tot+' <span class="mute" style="font-size:18px">/ '+T+' kcal</span></div><div class="bar '+(tot>T?"over":"")+'" style="margin:10px 0"><i style="width:'+pct+'%"></i></div><div class="mute">'+advice(tot,T)+'</div><details class="mute" style="margin-top:8px"><summary>¿Cómo se calcula?</summary><p>Metabolismo basal (fórmula Mifflin-St Jeor) x 1.45 de actividad. Para bajar grasa se restan 450 kcal y para ganar músculo se suman 300. Mínimo: 1500 (hombre) o 1200 (mujer). Es un estimado.</p></details></div>';
+  h+=calCard("c");
   SLOTS.forEach(function(s){
     var items=ms.filter(function(m){return m.slot===s[0]});
     h+='<div class="card"><h3>'+s[0]+' <span class="mute" style="font-size:14px">'+String(s[1]).padStart(2,"0")+':00</span></h3>'+
@@ -334,6 +340,34 @@ function reasonFor(k){
 }
 function setR(k,r){r=(r||"").trim();if(!r){alert("Escribe un motivo.");return}S.log[k]=S.log[k]||{done:[],finished:false};S.log[k].reason=r;save();closeM();render();setTimeout(checkPrompts,300)}
 
+var MES=["Enero","Febrero","Marzo","Abril","Mayo","Junio","Julio","Agosto","Septiembre","Octubre","Noviembre","Diciembre"],cal={};
+function p2(n){return String(n).padStart(2,"0")}
+function cm(k){if(!cal[k]){var n=new Date();cal[k]={y:n.getFullYear(),m:n.getMonth()}}return cal[k]}
+function calNav(k,d){var c=cm(k);c.m+=d;if(c.m<0){c.m=11;c.y--}if(c.m>11){c.m=0;c.y++}render()}
+function gymState(k){var l=S.log[k];if(l&&l.finished)return"ok";if(k<S.p.start||k>=dk())return"";var d=new Date(k+"T00:00:00");return S.p.days.indexOf(d.getDay())>-1?"miss":""}
+function dayKcal(k){return(S.meals[k]||[]).reduce(function(s,m){return s+m.kcal},0)}
+function mealStatus(k){var tot=dayKcal(k),T=target(),g=S.p.goal,past=k<dk(),msg="";
+  if(!tot)return{tot:0,bad:false,msg:""};
+  if(tot>T*(g==="ganar"?1.2:1.1))msg="Te pasaste de tu meta: "+tot+" kcal consumidas contra "+T+" kcal. "+(g==="perder"?"Con exceso no hay déficit y tu pérdida de grasa se frena.":g==="ganar"?"Un exceso grande se convierte más en grasa que en músculo.":"Un exceso constante te hace subir de peso.");
+  else if(past&&tot<T*0.6)msg="Comiste muy poco: "+tot+" kcal contra tu meta de "+T+" kcal. Comer tan poco baja tu energía, puede hacerte perder músculo y frena tu progreso.";
+  else if(past&&g==="ganar"&&tot<T*0.85)msg="Quedaste por debajo de tu meta para ganar músculo ("+tot+" de "+T+" kcal). Sin suficientes calorías el músculo no crece.";
+  return{tot:tot,bad:!!msg,msg:msg}}
+function calCard(k){var c=cm(k),off=(new Date(c.y,c.m,1).getDay()+6)%7,n=new Date(c.y,c.m+1,0).getDate(),t=dk();
+  var h='<div class="card"><h3>'+(k==="h"?"Asistencia al gym":"Calorías por día")+'</h3><div class="cal-h"><span class="chip" onclick="calNav(\''+k+'\',-1)">‹</span><b>'+MES[c.m]+' '+c.y+'</b><span class="chip" onclick="calNav(\''+k+'\',1)">›</span></div><div class="cal">'+["L","M","M","J","V","S","D"].map(function(x){return'<div class="cdh">'+x+'</div>'}).join("");
+  for(var i=0;i<off;i++)h+='<div></div>';
+  for(var d=1;d<=n;d++){var key=c.y+"-"+p2(c.m+1)+"-"+p2(d),cls="cd"+(key===t?" today":""),inner;
+    if(k==="h"){var st=gymState(key);inner='<b>'+d+'</b><em>'+(st==="ok"?"✅":st==="miss"?"❌":"")+'</em>'}
+    else{var ms=key<=t?mealStatus(key):{tot:0,bad:false};if(ms.bad)cls+=" red";inner='<b>'+d+'</b><span>'+(ms.tot?ms.tot:"")+'</span>'}
+    h+='<div class="'+cls+'" onclick="calTap(\''+k+'\',\''+key+'\')">'+inner+'</div>'}
+  return h+'</div><div class="mute" style="margin-top:8px">'+(k==="h"?"✅ asististe · ❌ no asististe. Toca un día para ver el detalle.":"Los días en rojo están fuera de tu meta. Toca un día para ver por qué.")+'</div></div>'}
+function calTap(k,key){
+  if(k==="h"){var l=S.log[key],st=gymState(key),h='<h3>'+key+'</h3>';
+    if(st==="ok")h+='<p>✅ Asististe. '+(l.routine?'Rutina: '+esc(l.routine)+'. ':'')+l.done.length+' ejercicios completados.</p>';
+    else if(st==="miss")h+='<p>❌ No asististe.</p><p>'+(l&&l.reason?'Motivo: '+esc(l.reason):'No registraste el motivo.')+'</p><p class="mute">Cada sesión perdida atrasa tu meta unos '+Math.round(7/daysPerWeek())+' días.</p>'+(l&&l.reason?'':'<button class="btn" onclick="reasonFor(\''+key+'\')">Registrar motivo</button>');
+    else h+='<p class="mute">'+(key>=dk()?"Aún no hay registro para este día.":"Día de descanso.")+'</p>';
+    modal(h+'<button class="btn alt" onclick="closeM()">Cerrar</button>');return}
+  var ms=key<=dk()?mealStatus(key):{tot:0,bad:false,msg:""},list=(S.meals[key]||[]).map(function(m){return'<div>'+esc(m.slot)+': '+esc(m.name)+' · '+m.kcal+' kcal</div>'}).join("");
+  modal('<h3>'+key+'</h3><p><b>'+ms.tot+'</b> / '+target()+' kcal</p>'+(ms.bad?'<p style="color:var(--red)">'+ms.msg+'</p>':(ms.tot?'<p>Dentro de tu meta. ¡Bien!</p>':'<p class="mute">Sin comidas registradas.</p>'))+'<div class="mute">'+list+'</div><button class="btn alt" onclick="closeM()">Cerrar</button>')}
 var snooze={};
 function checkPrompts(){
   if(!S.p||$("#modal").innerHTML)return;
