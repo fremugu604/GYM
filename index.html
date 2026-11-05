@@ -133,15 +133,21 @@ walk:['<line class="e" x1="30" y1="74" x2="90" y2="74"/>','<line class="e" x1="3
 dl:['<line class="e" x1="64" y1="66" x2="76" y2="66"/>','<line class="e" x1="54" y1="54" x2="66" y2="54"/>']};
 var VIS={"Flexiones":"flex","Fondos en banco":"dips","Press con mancuernas en suelo":"lie","Pike push-up":"pike","Dominadas":"pullup","Remo con mancuerna":"row","Remo con banda":"row","Superman":"superman","Sentadillas":"squat","Zancadas":"lunge","Puente de glúteo":"bridge","Sentadilla goblet":"squat","Plancha":"plank","Crunch abdominal":"crunch","Press de pecho en máquina":"chest","Press de hombro en máquina":"shp","Press con mancuernas en banco":"lie","Tríceps en polea":"tri","Jalón al pecho":"jalon","Remo en máquina":"seatrow","Curl de bíceps en polea":"curl","Peso muerto":"dl","Prensa de piernas":"lpress","Extensión de piernas":"legext","Curl femoral":"legcurl","Sentadilla con mancuerna":"squat","Caminadora inclinada 10 min":"walk"};
 function slug(n){return n.toLowerCase().normalize("NFD").replace(/[\u0300-\u036f]/g,"").replace(/[^a-z0-9]+/g,"-").replace(/^-|-$/g,"")}
-function seg(x1,y1,x2,y2,c,w){return'<line class="'+c+'" stroke-width="'+w+'" x1="'+x1+'" y1="'+y1+'" x2="'+x2+'" y2="'+y2+'"/>'}
+var SKIN=["#F3CDAA","#DDA67C","#B07A52","#7A5035"];
+function seg(x1,y1,x2,y2,c,w){return'<line style="stroke:'+c+'" stroke-width="'+w+'" x1="'+x1+'" y1="'+y1+'" x2="'+x2+'" y2="'+y2+'"/>'}
 function body(a){
+  var f=S&&S.p&&S.p.sex==="f",si=S&&S.p&&S.p.skin!=null?S.p.skin:1,K=SKIN[si],H=f?"#2A1D16":"#3B2A20",D="#2B3140",T="var(--acc)",W="#F4F4F4";
   var d=(a[0]-a[2])>=-5?1:-1,o="";
-  o+='<g class="far" transform="translate(-4,0)">'+seg(a[4],a[5],a[10],a[11],"sh",12)+seg(a[10],a[11],a[12],a[13],"sk",8)+seg(a[12],a[13],a[12]+d*7,a[13],"wh",6)+'</g>';
-  o+='<g class="far" transform="translate(3,-2)">'+seg(a[2],a[3],a[6],a[7],"tp",9)+seg(a[6],a[7],a[8],a[9],"sk",6.5)+'</g>';
-  o+=seg(a[2],a[3],a[4],a[5],"tp",15)+seg(a[2],a[3],a[0],a[1],"sk",6);
-  o+=seg(a[4],a[5],a[10],a[11],"sh",12)+seg(a[10],a[11],a[12],a[13],"sk",8)+seg(a[12],a[13],a[12]+d*7,a[13],"wh",6);
-  o+=seg(a[2],a[3],a[6],a[7],"tp",9)+seg(a[6],a[7],a[8],a[9],"sk",6.5)+'<circle cx="'+a[8]+'" cy="'+a[9]+'" r="3.6" fill="#E0AC82"/>';
-  o+='<circle cx="'+a[0]+'" cy="'+a[1]+'" r="7.6" fill="#3B2A20"/><circle cx="'+(a[0]+d*1.6)+'" cy="'+(a[1]+1.3)+'" r="6.2" fill="#E0AC82"/>';
+  var dx=a[12]-a[10],dy=a[13]-a[11],ln=Math.hypot(dx,dy)||1,tipx,tipy;
+  if(Math.abs(dy)>Math.abs(dx)*1.5){tipx=a[12]+d*8;tipy=a[13]}else{tipx=a[12]+dx/ln*6;tipy=a[13]+dy/ln*6}
+  function leg(){return seg(a[4],a[5],a[10],a[11],D,f?13:12)+seg(a[10],a[11],a[12],a[13],f?D:K,f?8.5:8)+seg(a[12],a[13],tipx,tipy,W,7)}
+  function arm(){return seg(a[2],a[3],a[6],a[7],f?K:T,f?7:9)+seg(a[6],a[7],a[8],a[9],K,6.5)}
+  o+='<g class="far" transform="translate(-3,0)">'+leg()+'</g>';
+  o+='<g class="far" transform="translate(3,-2)">'+arm()+'</g>';
+  o+=seg(a[2],a[3],a[4],a[5],T,f?13:15)+seg(a[2],a[3],a[0],a[1],K,6);
+  o+=leg()+arm()+'<circle cx="'+a[8]+'" cy="'+a[9]+'" r="3.6" fill="'+K+'"/>';
+  if(f)o+=seg(a[0]-d*5,a[1]-2,a[0]-d*10,a[1]+7,H,4.5);
+  o+='<circle cx="'+a[0]+'" cy="'+a[1]+'" r="7.6" fill="'+H+'"/><circle cx="'+(a[0]+d*1.6)+'" cy="'+(a[1]+1.3)+'" r="6.2" fill="'+K+'"/>';
   return o}
 function fig(n){
   var k=VIS[n];if(!k)return"";var o='<div class="figs">';
@@ -179,7 +185,7 @@ function routine(pl){
 
 function nav(){var t=[["hoy","Hoy"],["comida","Comida"],["prog","Progreso"],["perfil","Perfil"]];
   $("#nav").innerHTML=S.p?t.map(function(x){return'<button class="'+(view===x[0]?"on":"")+'" onclick="go(\''+x[0]+'\')">'+x[1]+'</button>'}).join(""):"";}
-function initDraft(){draft={sex:S.p.sex,b:S.p.b,w:S.p.w,h:S.p.h,goal:S.p.goal,place:S.p.place,eqh:S.p.eqh.slice(),eqg:S.p.eqg.slice(),days:S.p.days.slice(),rt:S.p.rt}}
+function initDraft(){draft={sex:S.p.sex,skin:S.p.skin,b:S.p.b,w:S.p.w,h:S.p.h,goal:S.p.goal,place:S.p.place,eqh:S.p.eqh.slice(),eqg:S.p.eqg.slice(),days:S.p.days.slice(),rt:S.p.rt}}
 function go(v){view=v;if(v==="perfil"&&S.p)initDraft();render()}
 
 function render(){nav();var a=$("#app");
@@ -189,6 +195,7 @@ function render(){nav();var a=$("#app");
 
 function chips(obj,sel,fn){return'<div class="chips">'+Object.keys(obj).map(function(k){return'<span class="chip '+(sel.indexOf(k)>-1?"on":"")+'" onclick="'+fn+'(\''+k+'\')">'+obj[k]+'</span>'}).join("")+'</div>'}
 function tog(arr,k){var i=arr.indexOf(k);i>-1?arr.splice(i,1):arr.push(k)}
+function setSkin(i){sync();draft.skin=i;render()}
 function sync(){if($("#bd"))readForm()}
 function tDay(d){sync();tog(draft.days,d);render()}
 function tH(k){sync();tog(draft.eqh,k);render()}
@@ -198,6 +205,7 @@ function setPl(v){sync();draft.place=v;render()}
 function profileForm(btn){
   var p=draft;
   return'<label>Sexo</label><select id="sex"><option value="m"'+(p.sex==="m"?" selected":"")+'>Hombre</option><option value="f"'+(p.sex==="f"?" selected":"")+'>Mujer</option></select>'+
+  '<label>Tono de piel (para las ilustraciones)</label><div class="chips">'+SKIN.map(function(c,i){var on=(p.skin==null?1:p.skin)===i;return'<span class="chip" style="background:'+c+';width:46px;height:34px;padding:0;border:3px solid '+(on?"var(--ink)":"transparent")+'" onclick="setSkin('+i+')"></span>'}).join("")+'</div>'+
   '<label>Fecha de cumpleaños</label><input id="bd" type="date" max="'+dk()+'" value="'+(p.b||"")+'"><div class="row"><div><label>Peso (kg)</label><input id="w" type="number" inputmode="decimal" value="'+(p.w||"")+'"></div><div><label>Talla (cm)</label><input id="h" type="number" inputmode="numeric" value="'+(p.h||"")+'"></div></div>'+
   '<label>Meta</label><select id="goal"><option value="perder"'+(p.goal==="perder"?" selected":"")+'>Bajar grasa</option><option value="mantener"'+(p.goal==="mantener"?" selected":"")+'>Mantenerme y tonificar</option><option value="ganar"'+(p.goal==="ganar"?" selected":"")+'>Ganar músculo</option></select>'+
   '<label>¿Dónde entrenas?</label><div class="chips"><span class="chip '+(p.place==="h"?"on":"")+'" onclick="setPl(\'h\')">En casa</span><span class="chip '+(p.place==="g"?"on":"")+'" onclick="setPl(\'g\')">En el gym</span><span class="chip '+(p.place==="hg"?"on":"")+'" onclick="setPl(\'hg\')">Ambos</span></div>'+
@@ -211,7 +219,7 @@ function readForm(){draft.sex=$("#sex").value;draft.b=$("#bd").value;draft.w=+$(
 function saveP(){readForm();
   if(!draft.b||!draft.w||!draft.h){alert("Completa cumpleaños, peso y talla.");return}
   if(!draft.days.length){alert("Elige al menos un día de entreno.");return}
-  var old=S.p;S.p={sex:draft.sex,b:draft.b,w:draft.w,h:draft.h,goal:draft.goal,place:draft.place,eqh:draft.eqh,eqg:draft.eqg,days:draft.days.slice().sort(),rt:draft.rt,bmsg:old?old.bmsg:0,start:old?old.start:dk(),wlog:old?old.wlog:{}};
+  var old=S.p;S.p={sex:draft.sex,b:draft.b,w:draft.w,h:draft.h,goal:draft.goal,place:draft.place,eqh:draft.eqh,eqg:draft.eqg,days:draft.days.slice().sort(),rt:draft.rt,skin:draft.skin==null?1:draft.skin,bmsg:old?old.bmsg:0,start:old?old.start:dk(),wlog:old?old.wlog:{}};
   S.p.wlog[dk()]=S.p.w;
   place=S.p.place==="g"?"g":"h";save();view="hoy";render();checkPrompts();}
 
