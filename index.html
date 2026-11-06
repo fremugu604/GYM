@@ -278,6 +278,8 @@ function vComida(){
     items.map(function(m){return'<div style="display:flex;justify-content:space-between;gap:8px;margin:4px 0"><span>'+esc(m.name)+' · '+m.kcal+' kcal</span><a onclick="delMeal('+ms.indexOf(m)+')">Quitar</a></div>'}).join("")+
     '<button class="btn alt" onclick="addMeal(\''+s[0]+'\')">Agregar</button></div>';
   });
+  var ex=ms.filter(function(m){return m.slot==="Snack extra"});
+  h+='<div class="card"><h3>Snack extra <span class="mute" style="font-size:14px">cualquier hora</span></h3>'+ex.map(function(m){return'<div style="display:flex;justify-content:space-between;gap:8px;margin:4px 0"><span>'+esc(m.name)+' · '+m.kcal+' kcal</span><a onclick="delMeal('+ms.indexOf(m)+')">Quitar</a></div>'}).join("")+'<button class="btn alt" onclick="addMeal(\'Snack extra\')">Agregar snack</button></div>';
   return h;
 }
 function waterGoal(){return Math.max(1500,Math.round(S.p.w*35/250)*250)}
@@ -294,14 +296,327 @@ function advice(tot,T){
   return"Vas bien. Sigue registrando para ajustar tu plan.";
 }
 var FOODS=[["Huevo hervido", "1 unidad", 75], ["Huevo frito", "1 unidad", 95], ["Huevo revuelto", "1 unidad", 95], ["Arepa de maíz", "1 mediana", 160], ["Pan tajado", "1 tajada", 70], ["Pan francés", "1 unidad", 150], ["Pan de queso", "1 unidad", 110], ["Tostada integral", "1 tajada", 70], ["Avena en agua", "1 taza", 160], ["Granola", "1 porción", 200], ["Cereal con leche", "1 tazón", 220], ["Leche entera", "1 vaso", 150], ["Leche descremada", "1 vaso", 90], ["Yogur natural", "1 vaso", 120], ["Yogur griego", "1 pote", 130], ["Queso fresco", "1 porción", 80], ["Queso tajado", "1 tajada", 70], ["Mantequilla", "1 cucharadita", 35], ["Aguacate", "1/2 unidad", 120], ["Café negro", "1 taza", 5], ["Café con leche", "1 taza", 60], ["Chocolate caliente", "1 taza", 200], ["Jugo natural", "1 vaso", 110], ["Banano", "1 unidad", 105], ["Manzana", "1 unidad", 95], ["Naranja", "1 unidad", 65], ["Mandarina", "1 unidad", 45], ["Mango", "1 taza", 100], ["Papaya", "1 taza", 60], ["Fresas", "1 taza", 50], ["Uvas", "1 taza", 100], ["Sandía", "1 taza", 45], ["Piña", "1 taza", 80], ["Ensalada de frutas", "1 taza", 100], ["Arroz blanco", "1 taza cocido", 205], ["Arroz integral", "1 taza cocido", 215], ["Pasta cocida", "1 taza", 200], ["Papa cocida", "1 mediana", 160], ["Papa frita", "1 porción", 320], ["Yuca cocida", "1 porción", 160], ["Plátano maduro frito", "1 porción", 180], ["Patacón", "1 unidad", 120], ["Frijoles cocidos", "1 taza", 230], ["Lentejas cocidas", "1 taza", 230], ["Garbanzos cocidos", "1 taza", 270], ["Mazorca de maíz", "1 unidad", 130], ["Tortilla de maíz", "1 unidad", 65], ["Pechuga de pollo a la plancha", "1 porción (120 g)", 200], ["Pollo frito", "1 presa", 250], ["Carne de res asada", "1 porción (120 g)", 280], ["Carne molida guisada", "1 porción (120 g)", 250], ["Cerdo asado", "1 porción (120 g)", 300], ["Pescado a la plancha", "1 filete", 180], ["Atún en lata (agua)", "1 lata", 120], ["Jamón", "1 lonja", 35], ["Salchicha", "1 unidad", 140], ["Chorizo", "1 unidad", 250], ["Proteína en polvo", "1 scoop", 120], ["Ensalada mixta (sin aderezo)", "1 plato", 60], ["Brócoli cocido", "1 taza", 55], ["Zanahoria", "1 unidad", 30], ["Sopa de verduras", "1 plato", 120], ["Sancocho", "1 plato", 350], ["Hamburguesa", "1 unidad", 550], ["Pizza", "1 porción", 280], ["Perro caliente", "1 unidad", 350], ["Empanada", "1 unidad", 250], ["Papas de bolsa", "1 bolsa", 150], ["Galletas dulces", "3 unidades", 150], ["Chocolate en barra", "1 porción", 160], ["Helado", "1 bola", 140], ["Gaseosa", "1 vaso", 100], ["Cerveza", "1 lata", 150], ["Mantequilla de maní", "1 cucharada", 95], ["Almendras o nueces", "1 puñado", 165], ["Barra de cereal", "1 unidad", 120]];
+var RAW=`Huevos cocidos (duros)|2 unidades|150|huevo hervido
+Huevo a la plancha|1 unidad|90|huevo estrellado
+Huevo pochado|1 unidad|75|huevo poché
+Huevos pericos|2 huevos|230|huevos con tomate y cebolla colombia
+Huevos a la mexicana|2 huevos|230|huevo tomate cebolla chile
+Huevos rancheros|1 plato|400|
+Huevos con jamón|2 huevos|260|
+Huevos con chorizo|2 huevos|350|
+Huevos con tocino|2 huevos|300|
+Omelette de jamón y queso|1 unidad|300|omelet tortilla francesa
+Clara de huevo|1 unidad|17|
+Cereal con yogur|1 tazón|300|cereal yogurt corn flakes
+Cereal sin leche|1 taza|120|
+Yogur con fruta|1 vaso|150|yogurt
+Yogur con granola|1 tazón|280|yogurt
+Yogur bebible|1 botella|150|yogurt
+Hot cakes|3 unidades|300|panqueques pancakes
+Waffle|1 unidad|220|
+Sándwich de jamón y queso|1 unidad|350|emparedado
+Pan tostado con mantequilla|1 tajada|110|
+Pan con aguacate|1 tajada|170|
+Avena con leche|1 taza|220|
+Calentado paisa|1 plato|650|desayuno colombiano
+Changua|1 tazón|250|
+Tamal colombiano|1 unidad|450|
+Pandebono|1 unidad|150|pan de bono
+Almojábana|1 unidad|200|
+Buñuelo|1 unidad|180|
+Arepa con queso|1 unidad|260|
+Arepa rellena|1 unidad|350|
+Arepa de choclo|1 unidad|250|
+Arepa de huevo|1 unidad|280|
+Empanada colombiana|1 unidad|230|empanada de carne papa
+Caldo de costilla|1 tazón|220|
+Chocolate con queso|1 taza|250|
+Bocadillo veleño|1 unidad (30 g)|100|bocadin bocadillo dulce de guayaba
+Arequipe|1 cucharada|60|dulce de leche cajeta
+Obleas con arequipe|1 unidad|120|
+Brevas con arequipe|1 unidad|110|
+Cocada|1 unidad|130|
+Natilla|1 porción|250|
+Mazamorra|1 vaso|200|
+Bandeja paisa|1 plato|1200|
+Ajiaco|1 plato|500|
+Sancocho de gallina|1 plato|400|
+Sopa de lentejas|1 plato|250|
+Mondongo|1 plato|450|
+Cazuela de mariscos|1 plato|480|
+Arroz con pollo|1 plato|520|
+Arroz con coco|1 taza|280|
+Frijoles antioqueños|1 plato|500|fríjoles
+Pescado frito|1 filete|320|
+Mojarra frita|1 unidad|450|
+Chicharrón|1 porción|300|
+Morcilla|1 unidad|230|rellena
+Lechona|1 porción|400|
+Carne en bistec|1 porción|260|
+Carne desmechada|1 porción|250|
+Pollo guisado|1 presa|220|
+Sudado de pollo|1 porción|300|
+Pollo asado|1 pierna con muslo|250|
+Aborrajado|1 unidad|250|
+Papas criollas|1 porción|180|
+Papa chorreada|1 porción|300|
+Yuca frita|1 porción|300|
+Chips de plátano|1 bolsa|150|platanitos
+Mango biche con sal|1 porción|70|
+Chocoramo|1 unidad|240|
+Maní salado|1 puñado|170|cacahuates
+Chicharrón de cerdo|1 porción pequeña|150|
+Brownie|1 unidad|250|
+Gelatina|1 vaso|80|
+Paleta helada|1 unidad|80|
+Agua de panela|1 vaso|110|aguapanela
+Jugo de maracuyá|1 vaso|110|
+Jugo de lulo|1 vaso|110|
+Limonada natural|1 vaso|100|
+Limonada de coco|1 vaso|250|
+Kumis|1 vaso|140|
+Refajo|1 vaso|150|
+Aguardiente|1 trago|75|licor
+Taco de pastor|1 unidad|180|tacos
+Taco de bistec|1 unidad|200|tacos
+Taco de carnitas|1 unidad|210|tacos
+Taco de pollo|1 unidad|170|tacos
+Taco de suadero|1 unidad|190|tacos
+Taco de barbacoa|1 unidad|200|tacos
+Taco dorado|1 unidad|180|flauta tacos
+Taco de canasta|1 unidad|120|tacos
+Quesadilla de maíz con queso|1 unidad|250|
+Quesadilla de harina con queso|1 unidad|350|
+Gringa|1 unidad|400|
+Torta de jamón|1 unidad|550|
+Torta ahogada|1 unidad|600|
+Guajolota (torta de tamal)|1 unidad|600|
+Tamal mexicano|1 unidad|300|
+Tamal de elote|1 unidad|230|
+Enchiladas verdes o rojas|1 plato (3)|550|
+Enfrijoladas|1 plato|450|
+Chilaquiles|1 plato|500|
+Molletes|1 unidad|300|
+Sope|1 unidad|280|
+Tostada de tinga|1 unidad|180|
+Tostada de ceviche|1 unidad|150|
+Tlacoyo|1 unidad|240|
+Huarache|1 unidad|450|
+Gordita de chicharrón|1 unidad|280|
+Pozole|1 plato|400|
+Menudo|1 plato|350|
+Birria|1 plato|500|
+Caldo de pollo|1 plato|200|
+Sopa de tortilla|1 plato|300|sopa azteca
+Sopa de fideo|1 plato|200|
+Arroz rojo|1 taza|230|arroz mexicano
+Frijoles de la olla|1 taza|215|
+Frijoles refritos|1/2 taza|120|
+Guacamole|1/4 taza|100|
+Nopales cocidos|1 taza|25|
+Ensalada de nopales|1 plato|60|
+Chile relleno|1 unidad|350|
+Mole con pollo|1 plato|550|
+Cochinita pibil|1 porción|300|
+Arrachera|1 porción (120 g)|300|
+Fajitas de pollo|1 plato|350|
+Burrito de carne|1 unidad|500|
+Burrito de frijol|1 unidad|450|
+Nachos con queso|1 plato|600|
+Elote con mayonesa y queso|1 unidad|300|
+Esquites|1 vaso|250|
+Concha (pan dulce)|1 unidad|300|
+Cuernito|1 unidad|250|croissant
+Bolillo|1 unidad|150|pan telera birote
+Telera|1 unidad|180|
+Tortilla de harina|1 unidad|140|
+Totopos|1 porción (30 g)|140|tortilla chips
+Churros|1 unidad|180|
+Atole|1 vaso|150|
+Champurrado|1 vaso|220|
+Agua de horchata|1 vaso|150|
+Agua de jamaica|1 vaso|60|
+Agua de tamarindo|1 vaso|100|
+Licuado de plátano|1 vaso|250|batido
+Refresco de cola|1 lata (355 ml)|140|coca cola pepsi
+Cerveza mexicana|1 botella|150|
+Michelada|1 vaso|200|
+Tequila|1 caballito|65|licor
+Margarita|1 copa|250|
+Flan|1 porción|220|
+Arroz con leche|1 taza|300|
+Mazapán|1 unidad|90|
+Cacahuates japoneses|1 puñado|170|
+Sabritas|1 bolsa pequeña|150|papas
+Doritos|1 bolsa pequeña|150|
+Takis|1 bolsa pequeña|170|
+Palomitas|1 bolsa|130|
+Pepino con chile y limón|1 porción|40|
+Jícama con chile|1 taza|50|
+Fruta picada con chile y limón|1 vaso|120|
+Chicharrón de harina|1 bolsa|130|
+Gansito|1 unidad|240|marinela
+Pingüinos|1 unidad|250|marinela
+Galletas Marías|4 unidades|100|
+Cajeta|1 cucharada|60|
+Amaranto (alegría)|1 barra|130|
+Chocolate de mesa|1 taza|200|abuelita
+Guayaba|1 unidad|40|
+Melón|1 taza|55|
+Pera|1 unidad|100|
+Kiwi|1 unidad|40|
+Durazno|1 unidad|60|
+Ciruela|1 unidad|30|
+Granada|1/2 unidad|70|
+Tuna|1 unidad|40|
+Mamey|1 taza|120|
+Guanábana|1 taza|150|
+Lulo|1 unidad|30|
+Maracuyá|1 unidad|20|
+Zapote|1 unidad|140|
+Coco fresco|1 porción|160|
+Frutos rojos|1 taza|70|arándanos moras
+Queso panela|1 porción (30 g)|80|
+Queso Oaxaca|1 porción (30 g)|90|
+Queso campesino|1 porción (30 g)|80|
+Requesón|1/2 taza|110|
+Cuajada|1 porción|110|
+Crema|1 cucharada|50|
+Leche deslactosada|1 vaso|120|
+Leche de almendras|1 vaso|40|
+Leche con chocolate|1 vaso|200|
+Camarones|1 porción|120|
+Ceviche|1 plato|250|
+Sushi|6 piezas|300|
+Hígado de res|1 porción|190|
+Batido de proteína con leche|1 vaso|250|
+Pan de caja integral|1 rebanada|80|
+Galletas saladas|4 unidades|70|
+Barra de granola|1 unidad|130|
+Dátiles|3 unidades|70|
+Pasas|1 puñado|90|
+Cacahuate natural|1 puñado|165|
+Hummus|2 cucharadas|70|`;
+FOODS=FOODS.concat(RAW.split("\n").map(function(l){var p=l.split("|");return[p[0],p[1],+p[2],p[3]||""]}));
+var RAW2=`Starbucks Latte|Tall 355 ml|190|starbucks sbux café
+Starbucks Latte|Grande 473 ml|250|starbucks sbux café
+Starbucks Capuchino|Tall 355 ml|120|starbucks sbux café cappuccino
+Starbucks Capuchino|Grande 473 ml|140|starbucks sbux café cappuccino
+Starbucks Americano|Tall 355 ml|15|starbucks sbux café
+Starbucks Caramel Macchiato|Tall 355 ml|190|starbucks sbux café
+Starbucks Caramel Macchiato|Grande 473 ml|250|starbucks sbux café
+Starbucks Moca|Tall 355 ml|290|starbucks sbux café mocha
+Starbucks Moca|Grande 473 ml|370|starbucks sbux café mocha
+Starbucks Moca blanco|Tall 355 ml|360|starbucks sbux café white mocha
+Starbucks Frappuccino de caramelo|Tall 355 ml|290|starbucks sbux frapuccino frappe
+Starbucks Frappuccino de caramelo|Grande 473 ml|380|starbucks sbux frapuccino frappe
+Starbucks Frappuccino de moka|Tall 355 ml|280|starbucks sbux frapuccino frappe mocha
+Starbucks Frappuccino de moka|Grande 473 ml|370|starbucks sbux frapuccino frappe mocha
+Starbucks Frappuccino de café|Tall 355 ml|220|starbucks sbux frapuccino frappe
+Starbucks Frappuccino de crema (vainilla)|Tall 355 ml|310|starbucks sbux frapuccino frappe
+Starbucks Chai Latte|Tall 355 ml|190|starbucks sbux té
+Starbucks Matcha Latte|Tall 355 ml|190|starbucks sbux té verde
+Starbucks Chocolate caliente|Tall 355 ml|320|starbucks sbux
+Starbucks Cold Brew|Tall 355 ml|5|starbucks sbux café frío
+Starbucks Cold Brew con crema de vainilla|Tall 355 ml|70|starbucks sbux café frío
+Starbucks Pumpkin Spice Latte|Tall 355 ml|300|starbucks sbux calabaza
+Starbucks Refresher|Tall 355 ml|90|starbucks sbux bebida fría
+Starbucks Té helado|Tall 355 ml|60|starbucks sbux
+Starbucks Croissant de mantequilla|1 unidad|260|starbucks sbux pan
+Starbucks Croissant de jamón y queso|1 unidad|330|starbucks sbux pan
+Starbucks Muffin de arándanos|1 unidad|360|starbucks sbux
+Starbucks Muffin de chocolate|1 unidad|420|starbucks sbux
+Starbucks Brownie|1 unidad|410|starbucks sbux
+Starbucks Galleta de chispas de chocolate|1 unidad|370|starbucks sbux
+Starbucks Cake pop|1 unidad|170|starbucks sbux
+Starbucks Banana bread|1 rebanada|420|starbucks sbux pan de plátano
+Starbucks Pastel de zanahoria|1 rebanada|450|starbucks sbux
+Starbucks Sándwich de pavo o pollo|1 unidad|400|starbucks sbux
+Starbucks Bagel con queso crema|1 unidad|380|starbucks sbux
+Krispy Kreme Original Glazed|1 dona|190|krispy kreme crispi cream crispy donut rosquilla dona
+Krispy Kreme Dona de chocolate glaseada|1 dona|250|krispy kreme crispi cream crispy donut
+Krispy Kreme Dona con chispas de colores|1 dona|260|krispy kreme crispi cream crispy donut
+Krispy Kreme Dona rellena de crema|1 dona|330|krispy kreme crispi cream crispy donut
+Krispy Kreme Dona rellena de mermelada|1 dona|290|krispy kreme crispi cream crispy donut
+Krispy Kreme Dona de azúcar y canela|1 dona|200|krispy kreme crispi cream crispy donut
+Krispy Kreme Dona Oreo|1 dona|350|krispy kreme crispi cream crispy donut
+Krispy Kreme Mini dona|1 unidad|80|krispy kreme crispi cream crispy donut
+Krispy Kreme Café helado|1 vaso|250|krispy kreme crispi cream crispy
+McDonald's Big Mac|1 unidad|550|mcdonalds mcdonald mc donalds hamburguesa
+McDonald's Cuarto de libra con queso|1 unidad|520|mcdonalds mcdonald mc donalds hamburguesa
+McDonald's Hamburguesa con queso|1 unidad|300|mcdonalds mcdonald mc donalds
+McDonald's McNuggets|6 piezas|250|mcdonalds mcdonald mc donalds pollo
+McDonald's McNuggets|10 piezas|420|mcdonalds mcdonald mc donalds pollo
+McDonald's McMuffin de huevo|1 unidad|300|mcdonalds mcdonald mc donalds desayuno
+McDonald's Hotcakes con miel|1 orden|580|mcdonalds mcdonald mc donalds desayuno
+McDonald's Papas fritas|Mediana|320|mcdonalds mcdonald mc donalds
+McDonald's Papas fritas|Grande|490|mcdonalds mcdonald mc donalds
+McDonald's McFlurry Oreo|1 vaso|510|mcdonalds mcdonald mc donalds helado
+McDonald's Cono de helado|1 unidad|200|mcdonalds mcdonald mc donalds
+McDonald's Pay de manzana|1 unidad|230|mcdonalds mcdonald mc donalds
+Burger King Whopper|1 unidad|660|burger king hamburguesa
+Burger King Whopper con queso|1 unidad|740|burger king hamburguesa
+Burger King Hamburguesa con queso|1 unidad|300|burger king
+Burger King Sándwich de pollo crispy|1 unidad|560|burger king
+Burger King Papas fritas|Mediana|380|burger king
+Burger King Aros de cebolla|1 porción|320|burger king
+Burger King Nuggets|6 piezas|280|burger king pollo
+KFC Muslo de pollo|1 pieza|290|kfc pollo frito kentucky
+KFC Pechuga de pollo|1 pieza|390|kfc pollo frito kentucky
+KFC Alitas picantes|6 piezas|480|kfc pollo kentucky
+KFC Tiras de pollo|3 piezas|340|kfc pollo kentucky
+KFC Twister|1 unidad|480|kfc kentucky
+KFC Puré de papa|1 porción|120|kfc kentucky
+KFC Ensalada de col (coleslaw)|1 porción|150|kfc kentucky
+Subway Sándwich de pollo teriyaki|15 cm|370|subway sub
+Subway Sándwich de jamón|15 cm|280|subway sub
+Subway Sándwich de pavo|15 cm|280|subway sub
+Subway Sándwich de atún|15 cm|460|subway sub
+Subway Sándwich Italiano BMT|15 cm|410|subway sub
+Subway Sándwich vegetariano|15 cm|230|subway sub
+Subway Galleta|1 unidad|200|subway sub
+Domino's Pizza de pepperoni|1 rebanada|250|dominos domino pizza
+Domino's Pizza de queso|1 rebanada|220|dominos domino pizza
+Domino's Alitas|2 piezas|160|dominos domino
+Domino's Pan de ajo|1 pieza|150|dominos domino
+Domino's Palitos de queso|1 pieza|130|dominos domino
+Little Caesars Pizza de pepperoni|1 rebanada|280|little caesars pizza
+Little Caesars Crazy Bread|1 pieza|100|little caesars
+Pizza Hut Pizza de pepperoni|1 rebanada|280|pizza hut
+Dunkin' Dona glaseada|1 dona|260|dunkin dunkin donuts donut
+Dunkin' Dona rellena|1 dona|300|dunkin dunkin donuts donut
+Dunkin' Café helado con leche|Mediano|150|dunkin dunkin donuts
+Dunkin' Muffin|1 unidad|420|dunkin dunkin donuts
+Dunkin' Bagel|1 unidad|320|dunkin dunkin donuts
+Juan Valdez Capuchino|1 taza|140|juan valdez café
+Juan Valdez Latte|1 taza|200|juan valdez café
+Juan Valdez Americano|1 taza|10|juan valdez café
+Juan Valdez Frappé|1 vaso|350|juan valdez café
+Juan Valdez Brownie|1 unidad|380|juan valdez
+Juan Valdez Croissant|1 unidad|300|juan valdez
+Crepes & Waffles Crepe de pollo con champiñones|1 unidad|520|crepes waffles crepe
+Crepes & Waffles Waffle con helado|1 unidad|750|crepes waffles
+Crepes & Waffles Crepe dulce con helado|1 unidad|650|crepes waffles
+Crepes & Waffles Brownie con helado|1 unidad|600|crepes waffles
+Crepes & Waffles Ensalada de pollo|1 plato|450|crepes waffles
+Taco Bell Taco crujiente|1 unidad|170|taco bell
+Taco Bell Burrito supremo|1 unidad|400|taco bell
+Taco Bell Quesadilla de pollo|1 unidad|520|taco bell
+Taco Bell Nachos BellGrande|1 orden|740|taco bell`;
+FOODS=FOODS.concat(RAW2.split("\n").map(function(l){var p=l.split("|");return[p[0],p[1],+p[2],p[3]||""]}));
+var CH=[["Starbucks","starbucks"],["Krispy Kreme","krispy kreme"],["McDonald's","mcdonald"],["Burger King","burger king"],["KFC","kfc"],["Subway","subway"],["Domino's","domino"],["Little Caesars","little caesars"],["Dunkin'","dunkin"],["Juan Valdez","juan valdez"],["Crepes & Waffles","crepes"],["Taco Bell","taco bell"],["Pizza Hut","pizza hut"]];
+function chainChips(){return CH.map(function(c,i){return'<span class="chip" style="flex:none;white-space:nowrap" onclick="qs('+i+')">'+c[0].replace("&","&amp;")+'</span>'}).join("")}
+function qs(i){$("#fq").value=CH[i][1];fres(CH[i][1])}
+FOODS.forEach(function(f){if(/^huevo/i.test(f[0]))f[3]=(f[3]||"")+" cocinado cocido preparado"});
 var basket=[],mslot="";
-function nrm(t){return t.toLowerCase().normalize("NFD").replace(/[\u0300-\u036f]/g,"")}
+function nrm(t){return t.toLowerCase().normalize("NFD").replace(/[\u0300-\u036f]/g,"").replace(/yogurt|yoghurt/g,"yogur")}
+function stem(w){return w.length>4?w.replace(/(es|s)$/,""):w}
 function addMeal(slot){mslot=slot;basket=[];
-  modal('<h3>'+slot+'</h3><input id="fq" placeholder="Busca un alimento (ej. arroz, huevo)" oninput="fres(this.value)"><div id="fr" class="chips" style="margin:10px 0;max-height:150px;overflow:auto"></div><div id="fb"></div><button class="btn" onclick="saveMeal()">Guardar comida</button><button class="btn alt" onclick="skipMeal(\''+slot+'\')">No comí / Omitir</button>');
+  modal('<h3>'+slot+'</h3><input id="fq" placeholder="Busca un alimento (ej. arroz, huevo)" oninput="fres(this.value)"><div style="display:flex;gap:8px;overflow-x:auto;margin:8px 0">'+chainChips()+'</div><div id="fr" class="chips" style="margin:10px 0;max-height:210px;overflow:auto"></div><div id="fb"></div><button class="btn" onclick="saveMeal()">Guardar comida</button><button class="btn alt" onclick="skipMeal(\''+slot+'\')">No comí / Omitir</button>');
   fres("");fbask();}
-function fres(q){var n=nrm(q.trim()),r=[];
-  FOODS.forEach(function(f,i){if(!n||nrm(f[0]).indexOf(n)>-1)r.push(i)});
-  $("#fr").innerHTML=r.slice(0,14).map(function(i){return'<span class="chip" onclick="pick('+i+')">'+FOODS[i][0]+' · '+FOODS[i][1]+' · '+FOODS[i][2]+' kcal</span>'}).join("")+'<span class="chip" onclick="manual()">Otro: escribir calorías</span>';}
+function fres(q){var tk=nrm(q.trim()).split(/\s+/).filter(function(x){return x&&x!=="de"&&x!=="con"&&x!=="y"}).map(stem),r=[];
+  FOODS.forEach(function(f,i){var h=nrm(f[0]+" "+(f[3]||""));if(tk.every(function(t){return h.indexOf(t)>-1}))r.push(i)});
+  $("#fr").innerHTML=r.slice(0,24).map(function(i){return'<span class="chip" onclick="pick('+i+')">'+FOODS[i][0]+' · '+FOODS[i][1]+' · '+FOODS[i][2]+' kcal</span>'}).join("")+'<span class="chip" onclick="manual()">Otro: escribir calorías</span>';}
 function pick(i){var f=basket.filter(function(b){return b.i===i})[0];if(f)f.q+=1;else basket.push({i:i,q:1});fbask()}
 function manual(){var n=prompt("¿Qué comiste?"),k=+prompt("Calorías aproximadas:");if(n&&k){basket.push({m:1,name:n,kcal:k,q:1});fbask()}}
 function qty(j,d){basket[j].q+=d;if(basket[j].q<=0)basket.splice(j,1);fbask()}
