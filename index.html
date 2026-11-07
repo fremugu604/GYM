@@ -250,20 +250,67 @@ EX.push(
 {n:"Subir un escalón bajo",g:"legs",p:"r",e:"none",r:"2 x 6 por pierna",t:"Con una mano en un apoyo firme, sube a un escalón bajo y baja con control. Sin impulso."},
 {n:"Remo con banda sentado",g:"pull",p:"r",e:"band",r:"2 x 10",t:"Sentado con la espalda erguida, tira de la banda hacia el abdomen juntando los omóplatos y regresa despacio."}
 );
+POSE.pump=[[14,66,28,66,60,66,40,68,52,68,88,66,112,66],[14,66,28,66,60,66,40,68,52,68,88,66,112,66]];
+POSE.slr=[[14,66,28,66,60,66,40,68,52,68,88,66,112,66,82,48,92,68],[14,66,28,66,60,66,40,68,52,68,84,56,104,48,82,48,92,68]];
+POSE.pend=[[78,30,66,34,44,40,60,48,54,60,48,56,46,72],[78,30,66,34,44,40,72,48,80,60,48,56,46,72]];
+POSE.armup=[[60,12,60,24,60,46,62,38,64,52,60,60,60,72],[60,12,60,24,60,46,72,26,88,26,60,60,60,72]];
+POSE.smarch=[[52,18,48,28,46,52,60,36,72,40,70,50,70,72],[52,18,48,28,46,52,60,36,72,40,70,42,78,54,70,50,70,72]];
+var ARU='<polyline class="e" points="104,48 104,58"/><polyline class="e" points="100,52 104,48 108,52"/>',ARD='<polyline class="e" points="104,58 104,48"/><polyline class="e" points="100,54 104,58 108,54"/>';
+EXTRA.pump=[ARU,ARD];EXTRA.qset=['<circle cx="88" cy="63" r="4" style="fill:var(--line)"/>','<circle cx="88" cy="63" r="4" style="fill:var(--line)"/><polyline class="e" points="88,50 88,57"/><polyline class="e" points="84,54 88,58 92,54"/>'];
+EXTRA.gsq=['','<polyline class="e" points="60,52 60,59"/><polyline class="e" points="56,55 60,59 64,55"/>'];
+EXTRA.pend=['<rect x="88" y="42" width="30" height="5" style="fill:var(--line)"/><line class="e" x1="104" y1="47" x2="104" y2="75"/>','<rect x="88" y="42" width="30" height="5" style="fill:var(--line)"/><line class="e" x1="104" y1="47" x2="104" y2="75"/>'];
+EXTRA.smarch=[EXTRA.sit[0],EXTRA.sit[1]];
+POSE.qset=POSE.pump;POSE.gsq=POSE.pump;
+var TV={"Bombeo de tobillo acostado":"pump","Círculos con el tobillo":"pump","Contracción de cuádriceps":"qset","Contracción de glúteos acostado":"gsq","Elevación de pierna recta":"slr","Extensión de rodilla sentado":"legext","Péndulo del hombro":"pend","Apretar omóplatos":"seatrow","Elevación frontal asistida":"armup","Flexión de codo sin peso":"curl","Apretar pelota blanda":"curl","Marcha sentado":"smarch"};
+for(var tk in TV)VIS[tk]=TV[tk];
+EX.push(
+{n:"Bombeo de tobillo acostado",g:"legs",p:"r",e:"none",r:"2 x 15",t:"Acostado con la pierna estirada, lleva la punta del pie hacia ti y luego hacia adelante, como pisando un pedal. Ayuda a la circulación."},
+{n:"Círculos con el tobillo",g:"legs",p:"r",e:"none",r:"2 x 10 por lado",t:"Sentado o acostado, dibuja círculos lentos con el pie en ambas direcciones, sin forzar."},
+{n:"Contracción de cuádriceps",g:"legs",p:"r",e:"none",r:"2 x 10, sostén 5 s",t:"Acostado con la pierna estirada y una toalla enrollada bajo la rodilla, aprieta el muslo empujando la rodilla hacia la toalla. Sostén y relaja."},
+{n:"Contracción de glúteos acostado",g:"legs",p:"r",e:"none",r:"2 x 10, sostén 5 s",t:"Acostado boca arriba, aprieta los glúteos como si sostuvieras una moneda. Sostén y relaja, sin contener la respiración."},
+{n:"Elevación de pierna recta",g:"legs",p:"r",e:"none",r:"2 x 8 por pierna",t:"Acostado con una rodilla doblada, sube la otra pierna estirada hasta la altura de la rodilla contraria. Baja despacio."},
+{n:"Extensión de rodilla sentado",g:"legs",p:"r",e:"none",r:"2 x 8 por pierna",t:"Sentado en una silla firme, estira una rodilla hasta enderezar la pierna, sostén 2 segundos y baja lento. Sin peso."},
+{n:"Péndulo del hombro",g:"push",p:"r",e:"none",r:"2 x 30 s",t:"Apoya la mano sana en una mesa e inclínate un poco. Deja colgar el brazo operado y mécelo suave en pequeños círculos con el cuerpo, sin usar el músculo."},
+{n:"Apretar omóplatos",g:"pull",p:"r",e:"none",r:"2 x 10, sostén 3 s",t:"Sentado con la espalda recta, junta las paletas hacia la columna como si sostuvieras un lápiz entre ellas. Sostén y relaja."},
+{n:"Elevación frontal asistida",g:"push",p:"r",e:"none",r:"2 x 8",t:"Solo si tu médico lo autorizó. Con la otra mano sostén la muñeca del brazo operado y ayúdalo a subir al frente hasta donde no duela. Baja despacio."},
+{n:"Flexión de codo sin peso",g:"pull",p:"r",e:"none",r:"2 x 10",t:"Con el brazo al lado del cuerpo, dobla el codo llevando la mano al hombro y baja despacio. Sin peso."},
+{n:"Apretar pelota blanda",g:"pull",p:"r",e:"none",r:"2 x 10, sostén 3 s",t:"Aprieta suavemente una pelota blanda con la mano, sostén y suelta. Sin dolor."},
+{n:"Marcha sentado",g:"legs",p:"r",e:"none",r:"2 x 20 s",t:"Sentado con la espalda recta, sube una rodilla y luego la otra, como caminando. Respira con calma, sin aguantar el aire."}
+);
+var TIPOS={columna:["Columna","Evita torcer o encorvar la espalda, saltar o cargar peso."],rodilla:["Rodilla (prótesis, ligamento, menisco)","Evita saltos, giros con el pie apoyado y agacharte profundo. Respeta la flexión de rodilla que te permitió tu médico."],cadera:["Cadera","Sigue las precauciones de cadera que te dio tu cirujano (por ejemplo, no cruzar las piernas ni flexionar la cadera más de 90°, según tu caso)."],hombro:["Hombro","No cargues peso ni subas el brazo por encima del hombro sin autorización. Los movimientos son muy suaves."],abdomen:["Abdomen (hernia, cesárea, etc.)","Evita pujar, hacer fuerza con el abdomen y cargar peso. Exhala al esforzarte y sostén la herida con una almohada."],corazon:["Corazón (bypass, stent)","Mantén un ritmo en el que puedas conversar y no aguantes la respiración. Si hay dolor de pecho, mareo, falta de aire o palpitaciones, para y busca atención médica."],tobillo:["Tobillo o pie","Respeta la carga permitida (con muletas o sin apoyo) que te indicó tu médico."],brazo:["Brazo, codo, muñeca o mano","No cargues peso con el brazo operado ni hagas fuerza con la mano sin autorización."],otro:["Otro","Sigue las indicaciones específicas de tu médico para tu procedimiento."]};
+var C1="Caminata suave",RP={
+columna:{A1:["Respiración diafragmática","Levantarse de la silla","Puente de glúteo suave","Marcha acostado","Elevación de talones apoyado",C1],A2:["Levantarse de la silla","Sentadilla en la pared","Subir un escalón bajo","Puente de glúteo suave","Elevación de talones apoyado",C1],B1:["Respiración diafragmática","Deslizar el talón acostado","Marcha acostado","Extensión de cadera de pie","Equilibrio apoyado en silla",C1],B2:["Pájaro-perro","Bicho muerto","Extensión de cadera de pie","Equilibrio apoyado en silla","Remo con banda sentado",C1]},
+rodilla:{A1:["Bombeo de tobillo acostado","Contracción de cuádriceps","Deslizar el talón acostado","Elevación de pierna recta","Levantarse de la silla",C1],A2:["Elevación de pierna recta","Extensión de rodilla sentado","Levantarse de la silla","Sentadilla en la pared","Subir un escalón bajo",C1],B1:["Contracción de cuádriceps","Puente de glúteo suave","Elevación de talones apoyado","Equilibrio apoyado en silla","Extensión de rodilla sentado",C1],B2:["Puente de glúteo suave","Extensión de cadera de pie","Elevación de talones apoyado","Equilibrio apoyado en silla","Subir un escalón bajo",C1]},
+cadera:{A1:["Bombeo de tobillo acostado","Contracción de glúteos acostado","Deslizar el talón acostado","Elevación de pierna recta","Levantarse de la silla",C1],A2:["Puente de glúteo suave","Extensión de cadera de pie","Levantarse de la silla","Elevación de talones apoyado","Subir un escalón bajo",C1],B1:["Contracción de glúteos acostado","Marcha acostado","Elevación de talones apoyado","Equilibrio apoyado en silla","Extensión de cadera de pie",C1],B2:["Puente de glúteo suave","Equilibrio apoyado en silla","Sentadilla en la pared","Subir un escalón bajo","Elevación de talones apoyado",C1]},
+hombro:{A1:["Péndulo del hombro","Apretar omóplatos","Flexión de codo sin peso","Levantarse de la silla","Marcha acostado",C1],A2:["Péndulo del hombro","Elevación frontal asistida","Apretar omóplatos","Flexión de codo sin peso","Levantarse de la silla",C1],B1:["Péndulo del hombro","Respiración diafragmática","Puente de glúteo suave","Marcha acostado","Sentadilla en la pared",C1],B2:["Péndulo del hombro","Elevación frontal asistida","Puente de glúteo suave","Sentadilla en la pared","Subir un escalón bajo",C1]},
+abdomen:{A1:["Respiración diafragmática","Bombeo de tobillo acostado","Marcha sentado","Levantarse de la silla",C1],A2:["Respiración diafragmática","Levantarse de la silla","Elevación de talones apoyado","Puente de glúteo suave",C1],B1:["Respiración diafragmática","Marcha sentado","Elevación de talones apoyado","Equilibrio apoyado en silla",C1],B2:["Puente de glúteo suave","Marcha acostado","Sentadilla en la pared","Equilibrio apoyado en silla",C1]},
+corazon:{A1:["Respiración diafragmática","Marcha sentado","Levantarse de la silla","Elevación de talones apoyado",C1],A2:["Marcha sentado","Levantarse de la silla","Sentadilla en la pared","Elevación de talones apoyado",C1],B1:["Respiración diafragmática","Marcha sentado","Equilibrio apoyado en silla","Puente de glúteo suave",C1],B2:["Subir un escalón bajo","Puente de glúteo suave","Equilibrio apoyado en silla","Extensión de cadera de pie",C1]},
+tobillo:{A1:["Bombeo de tobillo acostado","Círculos con el tobillo","Elevación de pierna recta","Puente de glúteo suave","Respiración diafragmática"],A2:["Círculos con el tobillo","Elevación de pierna recta","Puente de glúteo suave","Elevación de talones apoyado",C1],B1:["Bombeo de tobillo acostado","Contracción de cuádriceps","Marcha sentado","Respiración diafragmática"],B2:["Equilibrio apoyado en silla","Elevación de talones apoyado","Levantarse de la silla","Subir un escalón bajo",C1]},
+brazo:{A1:["Apretar pelota blanda","Flexión de codo sin peso","Apretar omóplatos","Levantarse de la silla",C1],A2:["Apretar pelota blanda","Flexión de codo sin peso","Elevación frontal asistida","Apretar omóplatos",C1],B1:["Apretar pelota blanda","Puente de glúteo suave","Marcha acostado","Sentadilla en la pared",C1],B2:["Apretar pelota blanda","Puente de glúteo suave","Sentadilla en la pared","Levantarse de la silla",C1]},
+otro:{A1:["Respiración diafragmática","Levantarse de la silla","Puente de glúteo suave","Elevación de talones apoyado",C1],A2:["Respiración diafragmática","Levantarse de la silla","Puente de glúteo suave","Elevación de talones apoyado",C1],B1:["Marcha acostado","Extensión de cadera de pie","Equilibrio apoyado en silla",C1],B2:["Marcha acostado","Extensión de cadera de pie","Equilibrio apoyado en silla","Sentadilla en la pared",C1]}};
+function tipoOf(p){return p.cond?(p.tipo||"columna"):"otro"}
 function gentleRoutine(){
-  var done=Object.keys(S.log).filter(function(k){return S.log[k].finished}).length,l2=(S.p.level||1)>=2,band=(S.p.eqh||[]).indexOf("band")>-1,b=done%2===1,names;
-  if(!b)names=l2?["Levantarse de la silla","Sentadilla en la pared","Subir un escalón bajo","Puente de glúteo suave","Elevación de talones apoyado","Caminata suave"]:["Respiración diafragmática","Levantarse de la silla","Puente de glúteo suave","Marcha acostado","Elevación de talones apoyado","Caminata suave"];
-  else names=l2?["Pájaro-perro","Bicho muerto","Extensión de cadera de pie","Equilibrio apoyado en silla"].concat(band?["Remo con banda sentado"]:[],["Caminata suave"]):["Respiración diafragmática","Deslizar el talón acostado","Marcha acostado","Extensión de cadera de pie","Equilibrio apoyado en silla","Caminata suave"];
-  return{name:b?"Día B: espalda y equilibrio":"Día A: piernas y base",list:names.map(function(n){return EX.filter(function(e){return e.p==="r"&&e.n===n})[0]})};
+  var done=Object.keys(S.log).filter(function(k){return S.log[k].finished}).length,lv=(S.p.level||1)>=2?"2":"1",band=(S.p.eqh||[]).indexOf("band")>-1,b=done%2===1,t=RP[tipoOf(S.p)]||RP.otro;
+  var names=t[(b?"B":"A")+lv].filter(function(n){return n!=="Remo con banda sentado"||band});
+  return{name:b?"Día B: fuerza suave y equilibrio":"Día A: movilidad y base",list:names.map(function(n){return EX.filter(function(e){return e.p==="r"&&e.n===n})[0]})};
 }
-function gentleNote(){return'<div class="card"><h3>Rutina suave</h3><div class="mute">Movimientos lentos y sin dolor. Evita torcer o encorvar la espalda, saltar o cargar peso. Detente y avisa a tu médico si sientes dolor fuerte, hormigueo, adormecimiento o debilidad en las piernas.'+(S.p.restr?'<br><b>Tus restricciones:</b> '+esc(S.p.restr):'')+'<br>Esta app no sustituye las indicaciones de tu médico o fisioterapeuta.</div></div>'}
+function gentleNote(){var p=S.p,ti=tipoOf(p),T=TIPOS[ti],h='<div class="card"><h3>Rutina suave'+(p.cond?': '+esc(ti==="otro"&&p.otro?p.otro:T[0]):'')+'</h3><div class="mute">';
+  if(p.cxd){var w=Math.floor((new Date(dk())-new Date(p.cxd+"T00:00:00"))/604800000);if(w>=0)h+='Han pasado '+w+' semanas desde tu cirugía.'+(w<6?' Es una etapa temprana: haz solo lo que tu médico o fisioterapeuta te autorizó. ':' ')}
+  h+=(p.cond?T[1]+' ':'Movimientos lentos, sin dolor, sin saltos y sin cargar peso. ')+'Detente y avisa a tu médico si sientes dolor fuerte, hinchazón nueva, hormigueo, adormecimiento, mareo o falta de aire.';
+  if(p.restr)h+='<br><b>Tus restricciones:</b> '+esc(p.restr);
+  return h+'<br>Esta app no sustituye las indicaciones de tu médico o fisioterapeuta.</div></div>'}
 function gentleFood(){return'<div class="card mute">Incluir proteína en cada comida, y calcio y vitamina D, ayuda a recuperar músculo y hueso. Si estás en recuperación, confirma tu plan de alimentación con tu médico o nutriólogo.</div>'}
-function setCond(v){sync();draft.cond=v;if(!v)draft.ok=false;render()}
+function setCond(v){sync();draft.cond=v;if(!v){draft.ok=false;draft.tipo=""}render()}
 function togOk(){sync();draft.ok=!draft.ok;render()}
 function setLevel(n){sync();draft.level=n;render()}
+function setTipo(v){sync();draft.tipo=v;render()}
 function medBlock(p){
-  var old=p.b&&ageOf({b:p.b})>=65,h='<label>¿Tienes cirugía o rehabilitación?</label><div class="chips">'+[["","No"],["cx","Cirugía de columna"],["rehab","Rehabilitación / dolor de espalda"]].map(function(x){return'<span class="chip '+((p.cond||"")===x[0]?"on":"")+'" onclick="setCond(\''+x[0]+'\')">'+x[1]+'</span>'}).join("")+'</div>';
-  if(p.cond)h+='<div class="card" style="margin:12px 0"><div class="mute">Tu rutina será suave, sin saltos, torsiones ni cargas, enfocada en espalda y piernas. No sustituye las indicaciones de tu médico o fisioterapeuta.</div></div><label>Autorización (obligatorio)</label><div class="chips"><span class="chip '+(p.ok?"on":"")+'" onclick="togOk()">Mi médico o fisioterapeuta autorizó que haga ejercicio</span></div><label>Restricciones indicadas por tu médico (opcional)</label><input id="rs" placeholder="Ej. no cargar más de 3 kg" value="'+esc(p.restr||"")+'">';
+  var old=p.b&&ageOf({b:p.b})>=65,h='<label>¿Tuviste alguna cirugía o estás en rehabilitación?</label><div class="chips">'+[["","No"],["cx","Sí, cirugía"],["rehab","Sí, rehabilitación"]].map(function(x){return'<span class="chip '+((p.cond||"")===x[0]?"on":"")+'" onclick="setCond(\''+x[0]+'\')">'+x[1]+'</span>'}).join("")+'</div>';
+  if(p.cond){
+    h+='<label>¿De qué tipo?</label><div class="chips">'+Object.keys(TIPOS).map(function(k){return'<span class="chip '+(p.tipo===k?"on":"")+'" onclick="setTipo(\''+k+'\')">'+TIPOS[k][0]+'</span>'}).join("")+'</div>';
+    if(p.tipo==="otro")h+='<label>¿Cuál?</label><input id="ot" placeholder="Ej. vesícula, rodilla y cadera..." value="'+esc(p.otro||"")+'">';
+    if(p.cond==="cx")h+='<label>Fecha de la cirugía (opcional)</label><input id="cxd" type="date" max="'+dk()+'" value="'+(p.cxd||"")+'">';
+    h+='<div class="card" style="margin:12px 0"><div class="mute">Tu rutina será suave, sin saltos, torsiones ni cargas, y se adapta al tipo de procedimiento. No sustituye las indicaciones de tu médico o fisioterapeuta.</div></div><label>Autorización (obligatorio)</label><div class="chips"><span class="chip '+(p.ok?"on":"")+'" onclick="togOk()">Mi médico o fisioterapeuta autorizó que haga ejercicio</span></div><label>Restricciones indicadas por tu médico (opcional)</label><input id="rs" placeholder="Ej. no cargar más de 3 kg" value="'+esc(p.restr||"")+'">'}
   if(p.cond||old)h+='<label>Nivel de la rutina</label><div class="chips">'+[[1,"Suave: movilidad"],[2,"Moderado: más fuerza"]].map(function(x){return'<span class="chip '+((p.level||1)===x[0]?"on":"")+'" onclick="setLevel('+x[0]+')">'+x[1]+'</span>'}).join("")+'</div>';
   return h}
 var S;
@@ -296,7 +343,7 @@ function routine(pl){
 
 function nav(){var t=[["hoy","Hoy"],["comida","Comida"],["prog","Progreso"],["perfil","Perfil"]];
   $("#nav").innerHTML=S.p?t.map(function(x){return'<button class="'+(view===x[0]?"on":"")+'" onclick="go(\''+x[0]+'\')">'+x[1]+'</button>'}).join(""):"";}
-function initDraft(){draft={sex:S.p.sex,skin:S.p.skin,sport:S.p.sport,cond:S.p.cond,ok:S.p.ok,restr:S.p.restr,level:S.p.level,b:S.p.b,w:S.p.w,h:S.p.h,goal:S.p.goal,place:S.p.place,eqh:S.p.eqh.slice(),eqg:S.p.eqg.slice(),days:S.p.days.slice(),rt:S.p.rt}}
+function initDraft(){draft={sex:S.p.sex,skin:S.p.skin,sport:S.p.sport,cond:S.p.cond,tipo:S.p.tipo||(S.p.cond?"columna":""),otro:S.p.otro,cxd:S.p.cxd,ok:S.p.ok,restr:S.p.restr,level:S.p.level,b:S.p.b,w:S.p.w,h:S.p.h,goal:S.p.goal,place:S.p.place,eqh:S.p.eqh.slice(),eqg:S.p.eqg.slice(),days:S.p.days.slice(),rt:S.p.rt}}
 function go(v){view=v;if(v==="perfil"&&S.p)initDraft();render()}
 
 function render(){nav();var a=$("#app");
@@ -335,13 +382,14 @@ function profileForm(btn){
   '<label>Hora del recordatorio</label><input id="rt" type="time" value="'+(p.rt||"18:00")+'">'+
   '<button class="btn" onclick="saveP()">'+btn+'</button>';
 }
-function readForm(){var e;if(e=$("#sex"))draft.sex=e.value;if(e=$("#bd"))draft.b=e.value;if(e=$("#w"))draft.w=+e.value;if(e=$("#h"))draft.h=+e.value;if(e=$("#goal"))draft.goal=e.value;if(e=$("#rt"))draft.rt=e.value;if(e=$("#rs"))draft.restr=e.value}
+function readForm(){var e;if(e=$("#sex"))draft.sex=e.value;if(e=$("#bd"))draft.b=e.value;if(e=$("#w"))draft.w=+e.value;if(e=$("#h"))draft.h=+e.value;if(e=$("#goal"))draft.goal=e.value;if(e=$("#rt"))draft.rt=e.value;if(e=$("#rs"))draft.restr=e.value;if(e=$("#ot"))draft.otro=e.value;if(e=$("#cxd"))draft.cxd=e.value}
 function saveP(){readForm();var kid=kidD(draft);
   if(!draft.b||(!kid&&(!draft.w||!draft.h))){alert(kid?"Completa la fecha de cumpleaños.":"Completa cumpleaños, peso y talla.");return}
   if(!draft.days.length){alert("Elige al menos un día de entreno.");return}
+  if(!kid&&draft.cond&&!draft.tipo){alert("Elige el tipo de cirugía o rehabilitación.");return}
   if(!kid&&draft.cond&&!draft.ok){alert("Confirma que tu médico o fisioterapeuta autorizó el ejercicio.");return}
   if(kid&&draft.days.length>3){alert("Para niños recomendamos máximo 3 días por semana, con descanso entre ellos.");return}
-  var old=S.p;S.p={sex:draft.sex,b:draft.b,w:kid?0:draft.w,h:kid?0:draft.h,goal:kid?"fuerza":draft.goal,place:kid?"h":draft.place,eqh:draft.eqh,eqg:kid?[]:draft.eqg,sport:draft.sport||"ambos",cond:kid?"":(draft.cond||""),ok:!!draft.ok,restr:draft.restr||"",level:draft.level||1,days:draft.days.slice().sort(),rt:draft.rt,skin:draft.skin==null?1:draft.skin,bmsg:old?old.bmsg:0,start:old?old.start:dk(),wlog:old?old.wlog:{}};
+  var old=S.p;S.p={sex:draft.sex,b:draft.b,w:kid?0:draft.w,h:kid?0:draft.h,goal:kid?"fuerza":draft.goal,place:kid?"h":draft.place,eqh:draft.eqh,eqg:kid?[]:draft.eqg,sport:draft.sport||"ambos",cond:kid?"":(draft.cond||""),ok:!!draft.ok,restr:draft.restr||"",level:draft.level||1,tipo:kid?"":(draft.cond?(draft.tipo||""):""),otro:draft.otro||"",cxd:draft.cxd||"",days:draft.days.slice().sort(),rt:draft.rt,skin:draft.skin==null?1:draft.skin,bmsg:old?old.bmsg:0,start:old?old.start:dk(),wlog:old?old.wlog:{}};
   if(S.p.w)S.p.wlog[dk()]=S.p.w;
   place=S.p.place==="g"?"g":"h";save();view="hoy";render();checkPrompts();}
 
