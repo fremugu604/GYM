@@ -197,11 +197,31 @@ function kidRoutine(){
 }
 function kidNote(){return'<div class="card"><h3>Entrenamiento infantil</h3><div class="mute">Siempre con un adulto presente. Calentamiento de 3 a 5 min (trotar y círculos de brazos y piernas). Descanso de 45 a 60 s entre ejercicios y sesiones de 15 a 20 min, 2 o 3 veces por semana sin días seguidos. Sin peso extra. Si algo duele, se detiene.</div></div>'}
 var KG=[["fr","🍎 Fruta"],["ve","🥦 Verdura"],["pr","🍗 Proteína (huevo, carne, pollo, pescado, frijoles)"],["la","🥛 Lácteo"],["ce","🍞 Pan, arroz, avena o tortilla"],["dz","🍬 Dulces o comida rápida"]],kidSel=[];
-function addMealKid(slot){mslot=slot;kidSel=[];kidModal()}
-function kidModal(){modal('<h3>'+mslot+'</h3><p class="mute">¿Qué comió? Toca todo lo que aplique.</p><div class="chips" style="margin-bottom:6px">'+KG.map(function(g){return'<span class="chip '+(kidSel.indexOf(g[0])>-1?"on":"")+'" onclick="kg(\''+g[0]+'\')">'+g[1]+'</span>'}).join("")+'</div><button class="btn" onclick="saveKid()">Guardar</button><button class="btn alt" onclick="skipMeal(\''+mslot+'\')">No comió / Omitir</button>')}
-function kg(id){tog(kidSel,id);kidModal()}
-function saveKid(){if(!kidSel.length){alert("Toca al menos una opción.");return}
-  var nm=KG.filter(function(g){return kidSel.indexOf(g[0])>-1}).map(function(g){return g[1].replace(/ \(.*\)/,"")}).join(", ");
+var kidItems=[];
+function grp(t){t=nrm(t);
+  if(/helado|dona|donut|brownie|chocolate|gansito|pinguino|mazapan|cajeta|arequipe|bocadillo|oblea|cocada|dulce|gaseosa|refresco|hamburguesa|pizza|perro caliente|papas fritas|papa frita|sabritas|doritos|takis|chicharron|nachos|burrito|kfc|mcdonald|burger|domino|little caesars|taco bell|krispy|dunkin|starbucks|frappuccino|chocoramo|galleta|muffin|pastel|churro|gelatina|paleta|cerveza|michelada|tequila|margarita|aguardiente|refajo|barra de cereal|waffle|hot cake|crepe/.test(t))return["dz"];
+  var g=[];
+  if(/huevo|pollo|carne|cerdo|pescado|atun|camaron|frijol|lentej|garbanz|chorizo|salchicha|jamon|proteina|bistec|birria|pozole|menudo|mondongo|sancocho|ajiaco|ceviche|higado|nugget|taco|cochinita|arrachera|mojarra|sushi/.test(t))g.push("pr");
+  if(/leche|yogur|queso|cuajada|requeson|kumis|licuado|natilla|flan/.test(t))g.push("la");
+  if(/banano|manzana|naranja|mandarina|mango|papaya|fresa|uva|sandia|pina|fruta|guayaba|melon|pera|kiwi|durazno|ciruela|granada|tuna|mamey|guanabana|lulo|maracuya|zapote|coco|frutos|datil|pasas/.test(t))g.push("fr");
+  if(/ensalada|brocoli|zanahoria|nopal|verdura|aguacate|guacamole|pepino|jicama/.test(t))g.push("ve");
+  if(/arroz|pan |pan$|arepa|tortilla|avena|cereal|pasta|papa|yuca|platano|patacon|maiz|mazorca|bolillo|telera|tostada|granola|empanada|pandebono|almojabana|bunuelo|concha|cuernito|tamal|totopo|sandwich|croissant|bagel/.test(t))g.push("ce");
+  return g}
+function addMealKid(slot){mslot=slot;kidSel=[];kidItems=[];
+  modal('<h3>'+slot+'</h3><input id="kq" placeholder="Busca lo que comió (ej. caldo de pollo, helado)" oninput="kfres(this.value)"><div id="kr" class="chips" style="margin:8px 0;max-height:130px;overflow:auto"></div><div id="ks" class="chips"></div><p class="mute">O toca los grupos que aplican:</p><div id="kgc" class="chips" style="margin-bottom:6px"></div><button class="btn" onclick="saveKid()">Guardar</button><button class="btn alt" onclick="skipMeal(\''+slot+'\')">No comió / Omitir</button>');
+  kfres("");kidRender()}
+function kidRender(){
+  $("#ks").innerHTML=kidItems.map(function(n,i){return'<span class="chip on" onclick="kdel('+i+')">'+esc(n)+' ✕</span>'}).join("");
+  $("#kgc").innerHTML=KG.map(function(g){return'<span class="chip '+(kidSel.indexOf(g[0])>-1?"on":"")+'" onclick="kg(\''+g[0]+'\')">'+g[1]+'</span>'}).join("")}
+function kfres(q){var tk=nrm(q.trim()).split(/\s+/).filter(function(x){return x&&x!=="de"&&x!=="con"&&x!=="y"}).map(stem),r=[];
+  if(tk.length)FOODS.forEach(function(f,i){var h=nrm(f[0]+" "+(f[3]||""));if(tk.every(function(t){return h.indexOf(t)>-1}))r.push(i)});
+  $("#kr").innerHTML=r.slice(0,14).map(function(i){return'<span class="chip" onclick="kpick('+i+')">'+esc(FOODS[i][0])+'</span>'}).join("")+(tk.length?'<span class="chip" onclick="kother()">Otro: escribir</span>':'<span class="mute">Escribe el nombre de lo que comió.</span>')}
+function kpick(i){var f=FOODS[i];if(kidItems.indexOf(f[0])<0)kidItems.push(f[0]);grp(f[0]+" "+(f[3]||"")).forEach(function(x){if(kidSel.indexOf(x)<0)kidSel.push(x)});kidRender()}
+function kother(){var n=prompt("¿Qué comió?");if(n&&n.trim()){kidItems.push(n.trim());grp(n).forEach(function(x){if(kidSel.indexOf(x)<0)kidSel.push(x)});kidRender()}}
+function kdel(i){kidItems.splice(i,1);kidRender()}
+function kg(id){tog(kidSel,id);kidRender()}
+function saveKid(){if(!kidItems.length&&!kidSel.length){alert("Busca lo que comió o toca un grupo.");return}
+  var nm=kidItems.length?kidItems.join(", "):KG.filter(function(g){return kidSel.indexOf(g[0])>-1}).map(function(g){return g[1].replace(/ \(.*\)/,"")}).join(", ");
   mealsToday().push({slot:mslot,name:nm,kcal:0,g:kidSel.slice()});save();closeM();render()}
 function vComidaKid(){
   var ms=mealsToday(),cov={};ms.forEach(function(m){(m.g||[]).forEach(function(x){cov[x]=1})});
@@ -765,6 +785,8 @@ Crepes & Waffles Crepe de pollo con champiñones|1 unidad|520|crepes waffles cre
 Crepes & Waffles Waffle con helado|1 unidad|750|crepes waffles
 Crepes & Waffles Crepe dulce con helado|1 unidad|650|crepes waffles
 Crepes & Waffles Brownie con helado|1 unidad|600|crepes waffles
+Crepes & Waffles Helado|1 bola|150|crepes waffles helado
+Crepes & Waffles Copa de helado|2 bolas|300|crepes waffles helado
 Crepes & Waffles Ensalada de pollo|1 plato|450|crepes waffles
 Taco Bell Taco crujiente|1 unidad|170|taco bell
 Taco Bell Burrito supremo|1 unidad|400|taco bell
